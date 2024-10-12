@@ -1,0 +1,12 @@
+{
+  "domain": "azrouter_integration",
+  "name": "AZRouter Integration",
+  "codeowners": [
+    "@termitt64"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/termitt64/hacs-azrouter",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/termitt64/hacs-azrouter/issues",
+  "version": "0.0.1"
+}
