@@ -9,18 +9,18 @@ import aiohttp
 import async_timeout
 
 
-class IntegrationBlueprintApiClientError(Exception):
+class AZRouterIntegrationApiClientError(Exception):
     """Exception to indicate a general API error."""
 
 
-class IntegrationBlueprintApiClientCommunicationError(
-    IntegrationBlueprintApiClientError,
+class AZRouterIntegrationApiClientCommunicationError(
+    AZRouterIntegrationApiClientError,
 ):
     """Exception to indicate a communication error."""
 
 
-class IntegrationBlueprintApiClientAuthenticationError(
-    IntegrationBlueprintApiClientError,
+class AZRouterIntegrationApiClientAuthenticationError(
+    AZRouterIntegrationApiClientError,
 ):
     """Exception to indicate an authentication error."""
 
@@ -29,13 +29,13 @@ def _verify_response_or_raise(response: aiohttp.ClientResponse) -> None:
     """Verify that the response is valid."""
     if response.status in (401, 403):
         msg = "Invalid credentials"
-        raise IntegrationBlueprintApiClientAuthenticationError(
+        raise AZRouterIntegrationApiClientAuthenticationError(
             msg,
         )
     response.raise_for_status()
 
 
-class IntegrationBlueprintApiClient:
+class AZRouterIntegrationApiClient:
     """Sample API Client."""
 
     def __init__(
@@ -86,16 +86,16 @@ class IntegrationBlueprintApiClient:
 
         except TimeoutError as exception:
             msg = f"Timeout error fetching information - {exception}"
-            raise IntegrationBlueprintApiClientCommunicationError(
+            raise AZRouterIntegrationApiClientCommunicationError(
                 msg,
             ) from exception
         except (aiohttp.ClientError, socket.gaierror) as exception:
             msg = f"Error fetching information - {exception}"
-            raise IntegrationBlueprintApiClientCommunicationError(
+            raise AZRouterIntegrationApiClientCommunicationError(
                 msg,
             ) from exception
         except Exception as exception:  # pylint: disable=broad-except
             msg = f"Something really wrong happened! - {exception}"
-            raise IntegrationBlueprintApiClientError(
+            raise AZRouterIntegrationApiClientError(
                 msg,
             ) from exception
