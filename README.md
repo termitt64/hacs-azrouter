@@ -28,9 +28,10 @@ Platform | Description
 1. Restart Home Assistant
 1. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "AZRouter Integration"
 
-## Configuration is done in the UI
+## Configuration
 
-<!---->
+TODO: Configuration how to & link
+Lorem ipsum ... tbd
 
 ## Contributions are welcome!
 
