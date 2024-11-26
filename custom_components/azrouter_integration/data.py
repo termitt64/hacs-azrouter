@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from homeassistant.loader import Integration
 
     from .api import AZRouterIntegrationApiClient
-    from .coordinator import BlueprintDataUpdateCoordinator
+    from .coordinator import AZRouterDataUpdateCoordinator
 
 
 type AZRouterIntegrationConfigEntry = ConfigEntry[AZRouterIntegrationData]
@@ -21,5 +21,5 @@ class AZRouterIntegrationData:
     """Data for the Blueprint integration."""
 
     client: AZRouterIntegrationApiClient
-    coordinator: BlueprintDataUpdateCoordinator
+    coordinator: AZRouterDataUpdateCoordinator
     integration: Integration

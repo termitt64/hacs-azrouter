@@ -14,7 +14,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.loader import async_get_loaded_integration
 
 from .api import AZRouterIntegrationApiClient
-from .coordinator import BlueprintDataUpdateCoordinator
+from .coordinator import AZRouterDataUpdateCoordinator
 from .data import AZRouterIntegrationData
 
 if TYPE_CHECKING:
@@ -35,7 +35,7 @@ async def async_setup_entry(
     entry: AZRouterIntegrationConfigEntry,
 ) -> bool:
     """Set up this integration using UI."""
-    coordinator = BlueprintDataUpdateCoordinator(
+    coordinator = AZRouterDataUpdateCoordinator(
         hass=hass,
     )
     entry.runtime_data = AZRouterIntegrationData(
