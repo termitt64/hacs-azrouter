@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, Platform
+from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME, Platform
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.loader import async_get_loaded_integration
 
@@ -40,6 +40,7 @@ async def async_setup_entry(
     )
     entry.runtime_data = AZRouterIntegrationData(
         client=AZRouterIntegrationApiClient(
+            base_url=entry.data[CONF_URL],
             username=entry.data[CONF_USERNAME],
             password=entry.data[CONF_PASSWORD],
             session=async_get_clientsession(hass),

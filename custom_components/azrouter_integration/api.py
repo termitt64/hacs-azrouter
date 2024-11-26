@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import socket
-from typing import Any
+from typing import Any, Final
+from urllib.parse import urljoin
 
 import aiohttp
 import async_timeout
+
+API_URL: Final = "/api/v1/"
 
 
 class AZRouterIntegrationApiClientError(Exception):
@@ -40,6 +43,7 @@ class AZRouterIntegrationApiClient:
 
     def __init__(
         self,
+        base_url: str,
         username: str,
         password: str,
         session: aiohttp.ClientSession,
@@ -47,13 +51,14 @@ class AZRouterIntegrationApiClient:
         """Sample API Client."""
         self._username = username
         self._password = password
+        self._api_url = urljoin(base_url, API_URL)
         self._session = session
 
     async def async_get_data(self) -> Any:
         """Get data from the API."""
         return await self._api_wrapper(
             method="get",
-            url="https://jsonplaceholder.typicode.com/posts/1",
+            url=self._get_resource_url("devices"),
         )
 
     async def async_set_title(self, value: str) -> Any:
@@ -99,3 +104,6 @@ class AZRouterIntegrationApiClient:
             raise AZRouterIntegrationApiClientError(
                 msg,
             ) from exception
+
+    def _get_resource_url(self, resource: str) -> str:
+        return urljoin(self._api_url, resource)

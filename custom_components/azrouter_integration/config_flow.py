@@ -1,10 +1,10 @@
-"""Adds config flow for Blueprint."""
+"""Adds config flow for AZRouter."""
 
 from __future__ import annotations
 
 import voluptuous as vol
 from homeassistant import config_entries, data_entry_flow
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
+from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
@@ -17,8 +17,8 @@ from .api import (
 from .const import DOMAIN, LOGGER
 
 
-class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
-    """Config flow for Blueprint."""
+class AZRouterConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
+    """Config flow for AZRouter."""
 
     VERSION = 1
 
@@ -31,6 +31,7 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 await self._test_credentials(
+                    url=user_input[CONF_URL],
                     username=user_input[CONF_USERNAME],
                     password=user_input[CONF_PASSWORD],
                 )
@@ -54,6 +55,12 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required(
+                        CONF_URL,
+                        default=(user_input or {}).get(CONF_URL, vol.UNDEFINED),
+                    ): selector.TextSelector(
+                        selector.TextSelectorConfig(type=selector.TextSelectorType.URL)
+                    ),
+                    vol.Required(
                         CONF_USERNAME,
                         default=(user_input or {}).get(CONF_USERNAME, vol.UNDEFINED),
                     ): selector.TextSelector(
@@ -71,9 +78,10 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             errors=_errors,
         )
 
-    async def _test_credentials(self, username: str, password: str) -> None:
+    async def _test_credentials(self, url: str, username: str, password: str) -> None:
         """Validate credentials."""
         client = AZRouterIntegrationApiClient(
+            base_url=url,
             username=username,
             password=password,
             session=async_create_clientsession(self.hass),
