@@ -5,10 +5,10 @@
     "@termitt64"
   ],
   "config_flow": true,
-  "single_config_entry": true,
   "documentation": "https://github.com/termitt64/hacs-azrouter",
   "integration_type": "hub",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/termitt64/hacs-azrouter/issues",
+  "single_config_entry": true,
   "version": "0.0.1"
 }
