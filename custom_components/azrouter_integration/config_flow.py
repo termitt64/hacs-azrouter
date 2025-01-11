@@ -20,7 +20,8 @@ from .const import DOMAIN, LOGGER
 class AZRouterConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for AZRouter."""
 
-    VERSION = 1
+    VERSION = 0
+    MINOR_VERSION = 1
 
     async def async_step_user(
         self,
@@ -86,4 +87,4 @@ class AZRouterConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             password=password,
             session=async_create_clientsession(self.hass),
         )
-        await client.async_get_data()
+        await client.async_get_status()

@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import json
 import socket
 from typing import Any, Final
 from urllib.parse import urljoin
 
 import aiohttp
 import async_timeout
+from .const import LOGGER
 
 API_URL: Final = "/api/v1/"
 
@@ -35,6 +37,7 @@ def _verify_response_or_raise(response: aiohttp.ClientResponse) -> None:
         raise AZRouterIntegrationApiClientAuthenticationError(
             msg,
         )
+    LOGGER.debug("Got response: %s", response.text)
     response.raise_for_status()
 
 
@@ -53,13 +56,11 @@ class AZRouterIntegrationApiClient:
         self._password = password
         self._api_url = urljoin(base_url, API_URL)
         self._session = session
+        self._token = None
 
-    async def async_get_data(self) -> Any:
-        """Get data from the API."""
-        return await self._api_wrapper(
-            method="get",
-            url=self._get_resource_url("devices"),
-        )
+    async def async_get_status(self) -> Any:
+        """Get AZRouter status."""
+        return await self._get_resource("status")
 
     async def async_set_title(self, value: str) -> Any:
         """Get data from the API."""
@@ -69,6 +70,26 @@ class AZRouterIntegrationApiClient:
             data={"title": value},
             headers={"Content-type": "application/json; charset=UTF-8"},
         )
+
+    async def _get_resource(self, resource: str) -> Any:
+        """Access resource from REST api, authenticates if not yet authenticated"""
+        if self._token is None:
+            await self._login()
+
+        response = await self._api_wrapper(
+            method="get",
+            url=self._get_resource_url(resource),
+        )
+        return response.json()
+
+    async def _login(self) -> Any:
+        """Log in into AZRouter"""
+        response = await self._api_wrapper(
+            method="post",
+            data={"data": {"username": self._username, "password": self._password}},
+            url=self._get_resource_url("login"),
+        )
+        self._token = response.text()
 
     async def _api_wrapper(
         self,
@@ -80,6 +101,7 @@ class AZRouterIntegrationApiClient:
         """Get information from the API."""
         try:
             async with async_timeout.timeout(10):
+                LOGGER.debug("Request %s [%s]: %s", method, headers, data)
                 response = await self._session.request(
                     method=method,
                     url=url,
@@ -87,7 +109,7 @@ class AZRouterIntegrationApiClient:
                     json=data,
                 )
                 _verify_response_or_raise(response)
-                return await response.json()
+                return response
 
         except TimeoutError as exception:
             msg = f"Timeout error fetching information - {exception}"

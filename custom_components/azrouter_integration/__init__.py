@@ -29,6 +29,14 @@ PLATFORMS: list[Platform] = [
 ]
 
 
+async def async_setup(hass: HomeAssistant, config) -> bool:
+    """Set up this integration."""
+    hass.states.async_set("hello_state.world", "Paulus")
+
+    # Return boolean to indicate that initialization was successful.
+    return True
+
+
 # https://developers.home-assistant.io/docs/config_entries_index/#setting-up-an-entry
 async def async_setup_entry(
     hass: HomeAssistant,

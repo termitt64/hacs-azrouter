@@ -1,4 +1,4 @@
-"""BlueprintEntity class."""
+"""AZRouterEntity class."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from .coordinator import AZRouterDataUpdateCoordinator
 
 
 class AZRouterIntegrationEntity(CoordinatorEntity[AZRouterDataUpdateCoordinator]):
-    """BlueprintEntity class."""
+    """AZRouterEntity class."""
 
     _attr_attribution = ATTRIBUTION
 
