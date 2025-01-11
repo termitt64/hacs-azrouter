@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import timedelta
 from typing import TYPE_CHECKING, Any
 
@@ -41,7 +42,16 @@ class AZRouterDataUpdateCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self) -> Any:
         """Update data via library."""
         try:
-            return await self.config_entry.runtime_data.client.async_get_status()
+            client = self.config_entry.runtime_data.client
+            data = {
+                "cloud/status": await client.async_get_cloud_status(),
+                "status": await client.async_get_status(),
+                "power": await client.async_get_power(),
+                "devices": await client.async_get_devices(),
+            }
+            LOGGER.debug("Got AZRouter data:\n%s", json.dumps(data))
+            return data
+
         except AZRouterIntegrationApiClientAuthenticationError as exception:
             raise ConfigEntryAuthFailed(exception) from exception
         except AZRouterIntegrationApiClientError as exception:

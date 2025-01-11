@@ -58,18 +58,21 @@ class AZRouterIntegrationApiClient:
         self._session = session
         self._token = None
 
+    async def async_get_cloud_status(self) -> Any:
+        """Get AZRouter resource: Cloud Status."""
+        return await self._get_resource("cloud/status")
+
     async def async_get_status(self) -> Any:
-        """Get AZRouter status."""
+        """Get AZRouter resource: Status."""
         return await self._get_resource("status")
 
-    async def async_set_title(self, value: str) -> Any:
-        """Get data from the API."""
-        return await self._api_wrapper(
-            method="patch",
-            url="https://jsonplaceholder.typicode.com/posts/1",
-            data={"title": value},
-            headers={"Content-type": "application/json; charset=UTF-8"},
-        )
+    async def async_get_power(self) -> Any:
+        """Get AZRouter resource: Status."""
+        return await self._get_resource("power")
+
+    async def async_get_devices(self) -> Any:
+        """Get AZRouter resource: Status."""
+        return await self._get_resource("devices")
 
     async def _get_resource(self, resource: str) -> Any:
         """Access resource from REST api, authenticates if not yet authenticated"""
@@ -80,7 +83,7 @@ class AZRouterIntegrationApiClient:
             method="get",
             url=self._get_resource_url(resource),
         )
-        return response.json()
+        return await response.json()
 
     async def _login(self) -> Any:
         """Log in into AZRouter"""
