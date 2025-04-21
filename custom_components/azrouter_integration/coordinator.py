@@ -49,10 +49,10 @@ class AZRouterDataUpdateCoordinator(DataUpdateCoordinator):
                 "power": await client.async_get_power(),
                 "devices": await client.async_get_devices(),
             }
-            LOGGER.debug("Got AZRouter data:\n%s", json.dumps(data))
-            return data
-
         except AZRouterIntegrationApiClientAuthenticationError as exception:
             raise ConfigEntryAuthFailed(exception) from exception
         except AZRouterIntegrationApiClientError as exception:
             raise UpdateFailed(exception) from exception
+        else:
+            LOGGER.debug("Got AZRouter data:\n%s", json.dumps(data))
+            return data

@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import json
 import socket
 from typing import Any, Final
 from urllib.parse import urljoin
 
 import aiohttp
 import async_timeout
+
 from .const import LOGGER
 
 API_URL: Final = "/api/v1/"
@@ -75,7 +75,7 @@ class AZRouterIntegrationApiClient:
         return await self._get_resource("devices")
 
     async def _get_resource(self, resource: str) -> Any:
-        """Access resource from REST api, authenticates if not yet authenticated"""
+        """Access resource from REST api, authenticates if not yet authenticated."""
         if self._token is None:
             await self._login()
 
@@ -86,7 +86,7 @@ class AZRouterIntegrationApiClient:
         return await response.json()
 
     async def _login(self) -> Any:
-        """Log in into AZRouter"""
+        """Log in into AZRouter."""
         response = await self._api_wrapper(
             method="post",
             data={"data": {"username": self._username, "password": self._password}},

@@ -19,6 +19,7 @@ from .data import AZRouterIntegrationData
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
+    from homeassistant.helpers.typing import ConfigType
 
     from .data import AZRouterIntegrationConfigEntry
 
@@ -29,7 +30,7 @@ PLATFORMS: list[Platform] = [
 ]
 
 
-async def async_setup(hass: HomeAssistant, config) -> bool:
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:  # noqa: ARG001
     """Set up this integration."""
     hass.states.async_set("hello_state.world", "Paulus")
 
