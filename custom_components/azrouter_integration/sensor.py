@@ -15,13 +15,13 @@ if TYPE_CHECKING:
     from .coordinator import AZRouterDataUpdateCoordinator
     from .data import AZRouterIntegrationConfigEntry
 
-ENTITY_DESCRIPTIONS = (
+ENTITY_DESCRIPTIONS = {
     SensorEntityDescription(
-        key="azrouter_integration",
-        name="Integration Sensor",
+        key="router_uptime",
+        name="Uptime",
         icon="mdi:format-quote-close",
-    ),
-)
+    ): "status.system.uptime",
+}
 
 
 async def async_setup_entry(
@@ -34,24 +34,28 @@ async def async_setup_entry(
         AZRouterIntegrationSensor(
             coordinator=entry.runtime_data.coordinator,
             entity_description=entity_description,
+            path=path,
         )
-        for entity_description in ENTITY_DESCRIPTIONS
+        for entity_description, path in ENTITY_DESCRIPTIONS.items()
     )
 
 
 class AZRouterIntegrationSensor(AZRouterIntegrationEntity, SensorEntity):
     """azrouter_integration Sensor class."""
 
+    _attr_has_entity_name = True
+
     def __init__(
         self,
         coordinator: AZRouterDataUpdateCoordinator,
         entity_description: SensorEntityDescription,
+        path: str,
     ) -> None:
         """Initialize the sensor class."""
-        super().__init__(coordinator)
+        super().__init__(coordinator, path)
         self.entity_description = entity_description
 
     @property
     def native_value(self) -> str | None:
         """Return the native value of the sensor."""
-        return self.coordinator.data.get("body")
+        return self.raw_value
