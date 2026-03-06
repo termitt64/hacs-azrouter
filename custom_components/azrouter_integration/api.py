@@ -67,12 +67,20 @@ class AZRouterIntegrationApiClient:
         return await self._get_resource("status")
 
     async def async_get_power(self) -> Any:
-        """Get AZRouter resource: Status."""
+        """Get AZRouter resource: Power."""
         return await self._get_resource("power")
 
     async def async_get_devices(self) -> Any:
-        """Get AZRouter resource: Status."""
+        """Get AZRouter resource: Devices."""
         return await self._get_resource("devices")
+
+    async def async_get_address(self) -> Any:
+        """Get AZRouter resource: Address."""
+        return await self._get_resource("address")
+
+    async def async_get_settings(self) -> Any:
+        """Get AZRouter resource: Settings."""
+        return await self._get_resource("settings")
 
     async def _get_resource(self, resource: str) -> Any:
         """Access resource from REST api, authenticates if not yet authenticated."""
