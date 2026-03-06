@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorEntityDescription,
+)
 
 from .entity import AZRouterIntegrationEntity
 
@@ -19,7 +23,10 @@ ENTITY_DESCRIPTIONS = {
     SensorEntityDescription(
         key="router_uptime",
         name="Uptime",
-        icon="mdi:format-quote-close",
+        icon="mdi:timer-outline",
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement="ms",
+        suggested_unit_of_measurement="d",
     ): "status.system.uptime",
 }
 
