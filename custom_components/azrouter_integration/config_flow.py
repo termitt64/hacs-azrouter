@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from urllib.parse import urlsplit
+
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME
@@ -46,8 +48,10 @@ class AZRouterConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 LOGGER.exception(exception)
                 _errors["base"] = "unknown"
             else:
+                url = urlsplit(user_input[CONF_URL])
+                host = url.netloc
                 return self.async_create_entry(
-                    title="A-Z Router",
+                    title="host: " + host,
                     data=user_input,
                 )
 
