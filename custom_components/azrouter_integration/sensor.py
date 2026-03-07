@@ -10,10 +10,12 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
 )
 
+from .device import AZDeviceFactory
 from .entity import AZRouterIntegrationEntity
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
+    from homeassistant.helpers.device_registry import DeviceInfo
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
     from .coordinator import AZRouterDataUpdateCoordinator
@@ -37,12 +39,12 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform."""
+    coordinator = entry.runtime_data.coordinator
+    devices = AZDeviceFactory(coordinator).create_devices()
+    router_device = devices[0].get_device_info()
+
     async_add_entities(
-        AZRouterIntegrationSensor(
-            coordinator=entry.runtime_data.coordinator,
-            entity_description=entity_description,
-            path=path,
-        )
+        AZRouterIntegrationSensor(coordinator, entity_description, path, router_device)
         for entity_description, path in ENTITY_DESCRIPTIONS.items()
     )
 
@@ -57,9 +59,10 @@ class AZRouterIntegrationSensor(AZRouterIntegrationEntity, SensorEntity):
         coordinator: AZRouterDataUpdateCoordinator,
         entity_description: SensorEntityDescription,
         path: str,
+        device_info: DeviceInfo | None = None,
     ) -> None:
         """Initialize the sensor class."""
-        super().__init__(coordinator, path)
+        super().__init__(coordinator, path, device_info)
         self.entity_description = entity_description
 
     @property

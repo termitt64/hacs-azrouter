@@ -9,7 +9,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from custom_components.azrouter_integration.data_value_accessor import DataValueAccessor
 
-from .const import ATTRIBUTION
+from .const import ATTRIBUTION, DOMAIN
 from .coordinator import AZRouterDataUpdateCoordinator
 
 
@@ -19,15 +19,18 @@ class AZRouterIntegrationEntity(CoordinatorEntity[AZRouterDataUpdateCoordinator]
     _attr_attribution = ATTRIBUTION
 
     def __init__(
-        self, coordinator: AZRouterDataUpdateCoordinator, path: str = ""
+        self,
+        coordinator: AZRouterDataUpdateCoordinator,
+        path: str = "",
+        device_info: DeviceInfo | None = None,
     ) -> None:
         """Initialize."""
         super().__init__(coordinator)
         self._attr_unique_id = coordinator.config_entry.entry_id
-        self._attr_device_info = DeviceInfo(
+        self._attr_device_info = device_info or DeviceInfo(
             identifiers={
                 (
-                    coordinator.config_entry.domain,
+                    DOMAIN,
                     coordinator.config_entry.entry_id,
                 ),
             },
