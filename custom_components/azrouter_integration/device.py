@@ -39,8 +39,8 @@ class AZRouter(AZDeviceBase):
         """Create HA DeviceInfo object."""
         d = self._raw_data
         mac = d["mac"]
-        serial = "{} mac: {}".format(d["sn"], mac)
-        sw = d["fw"] + ";" + d["www"]
+        serial = "{} (mac: {})".format(d["sn"], mac)
+        sw = "{}; {}".format(d["fw"], d["www"])
         return DeviceInfo(
             identifiers={(DOMAIN, mac)},
             name="A-Z Router SMART",
