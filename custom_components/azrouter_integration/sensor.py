@@ -4,14 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from homeassistant.components.sensor import (
-    SensorDeviceClass,
-    SensorEntity,
-    SensorEntityDescription,
-)
+from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
 
-from .device import AZDeviceFactory
 from .entity import AZRouterIntegrationEntity
+from .entity_description import EntityDescriptionFactory
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -21,17 +17,6 @@ if TYPE_CHECKING:
     from .coordinator import AZRouterDataUpdateCoordinator
     from .data import AZRouterIntegrationConfigEntry
 
-ENTITY_DESCRIPTIONS = {
-    SensorEntityDescription(
-        key="router_uptime",
-        name="Uptime",
-        icon="mdi:timer-outline",
-        device_class=SensorDeviceClass.DURATION,
-        native_unit_of_measurement="ms",
-        suggested_unit_of_measurement="d",
-    ): "status.system.uptime",
-}
-
 
 async def async_setup_entry(
     hass: HomeAssistant,  # noqa: ARG001 Unused function argument: `hass`
@@ -40,12 +25,11 @@ async def async_setup_entry(
 ) -> None:
     """Set up the sensor platform."""
     coordinator = entry.runtime_data.coordinator
-    devices = AZDeviceFactory(coordinator).create_devices()
-    router_device = devices[0].get_device_info()
+    factory = EntityDescriptionFactory(coordinator)
 
     async_add_entities(
-        AZRouterIntegrationSensor(coordinator, entity_description, path, router_device)
-        for entity_description, path in ENTITY_DESCRIPTIONS.items()
+        AZRouterIntegrationSensor(coordinator, spec.description, spec.path, spec.device_info)
+        for spec in factory.sensor_descriptions()
     )
 
 
@@ -64,6 +48,7 @@ class AZRouterIntegrationSensor(AZRouterIntegrationEntity, SensorEntity):
         """Initialize the sensor class."""
         super().__init__(coordinator, path, device_info)
         self.entity_description = entity_description
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_{entity_description.key}"
 
     @property
     def native_value(self) -> str | None:
