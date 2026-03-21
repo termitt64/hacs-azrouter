@@ -32,7 +32,6 @@ PLATFORMS: list[Platform] = [
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:  # noqa: ARG001
     """Set up this integration."""
-
     # Return boolean to indicate that initialization was successful.
     return True
 
