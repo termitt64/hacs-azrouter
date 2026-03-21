@@ -52,6 +52,29 @@ class AZRouter(AZDeviceBase):
         )
 
 
+class AZCharger(AZDeviceBase):
+    """Representation of an AZ Charger device linked to the router."""
+
+    def __init__(self, dev_data: Mapping[str, Any], router_mac: str) -> None:
+        """Construct AZCharger device."""
+        super().__init__(dev_data)
+        self._router_mac = router_mac
+
+    def get_device_info(self) -> DeviceInfo:
+        """Create HA DeviceInfo object."""
+        c = self._raw_data["common"]
+        identifier = f"{self._router_mac}_{c['id']}"
+        return DeviceInfo(
+            identifiers={(DOMAIN, identifier)},
+            name=c["name"],
+            manufacturer="A-Z Traders",
+            model="AZ Charger",
+            sw_version=c["fw"],
+            hw_version=str(c["hw"]),
+            via_device=(DOMAIN, self._router_mac),
+        )
+
+
 class AZDeviceFactory:
     """Factory to create devices."""
 
@@ -66,8 +89,12 @@ class AZDeviceFactory:
         """Create AZDevice objects from data provided by coordinator."""
         devices: list[AZDeviceBase] = []
 
-        # Router
-        router = AZRouter(self._extract_data("status.system"))
+        system_data = self._extract_data("status.system")
+        router = AZRouter(system_data)
         devices.append(router)
+
+        router_mac = system_data.get("mac", "")
+        for dev_data in self._coordinator.data.get("devices", []):
+            devices.append(AZCharger(dev_data, router_mac))
 
         return devices
