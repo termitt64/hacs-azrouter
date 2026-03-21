@@ -13,7 +13,13 @@ class DataValueAccessor:
         self._key = parts[0]
         self._proxy = DataValueAccessor(parts[1]) if len(parts) > 1 else None
 
-    def extract(self, data: Mapping[str, Any]) -> Any:
-        """Retrieve value from given data (dict)."""
-        value = data.get(self._key)
-        return self._proxy.extract(value) if value and self._proxy else value
+    def extract(self, data: Mapping[str, Any] | list[Any]) -> Any:
+        """Retrieve value from given data (dict or list)."""
+        if isinstance(data, list):
+            try:
+                value = data[int(self._key)]
+            except (ValueError, IndexError):
+                return None
+        else:
+            value = data.get(self._key)
+        return self._proxy.extract(value) if value is not None and self._proxy else value
