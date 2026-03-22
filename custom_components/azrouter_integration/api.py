@@ -22,6 +22,7 @@ class AZRouterApiClientProtocol(Protocol):
     async def async_get_status(self) -> Any: ...
     async def async_get_power(self) -> Any: ...
     async def async_get_devices(self) -> Any: ...
+    async def async_post(self, resource: str, data: dict) -> Any: ...
 
 
 class AZRouterIntegrationApiClientError(Exception):
@@ -92,6 +93,10 @@ class AZRouterIntegrationApiClient:
         """Get AZRouter resource: Settings."""
         return await self._get_resource("settings")
 
+    async def async_post(self, resource: str, data: dict) -> Any:
+        """Post data to a resource."""
+        return await self._post_resource(resource, data)
+
     async def _get_resource(self, resource: str) -> Any:
         """Access resource from REST api, authenticates if not yet authenticated."""
         if self._token is None:
@@ -103,6 +108,19 @@ class AZRouterIntegrationApiClient:
         )
         return await response.json()
 
+    async def _post_resource(self, resource: str, data: dict) -> Any:
+        """Post data to a resource, authenticating first if needed."""
+        if self._token is None:
+            await self._login()
+
+        response = await self._api_wrapper(
+            method="post",
+            url=self._get_resource_url(resource),
+            data=data,
+            headers={"Cookie": f"token={self._token}"},
+        )
+        return await response.text()
+
     async def _login(self) -> Any:
         """Log in into AZRouter."""
         response = await self._api_wrapper(
@@ -110,7 +128,7 @@ class AZRouterIntegrationApiClient:
             data={"data": {"username": self._username, "password": self._password}},
             url=self._get_resource_url("login"),
         )
-        self._token = response.text()
+        self._token = await response.text()
 
     async def _api_wrapper(
         self,
