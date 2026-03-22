@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import socket
-from typing import Any, Final
+from typing import Any, Final, Protocol, runtime_checkable
 from urllib.parse import urljoin
 
 import aiohttp
@@ -12,6 +12,16 @@ import async_timeout
 from .const import LOGGER
 
 API_URL: Final = "/api/v1/"
+
+
+@runtime_checkable
+class AZRouterApiClientProtocol(Protocol):
+    """Protocol defining the AZ Router API client interface."""
+
+    async def async_get_cloud_status(self) -> Any: ...
+    async def async_get_status(self) -> Any: ...
+    async def async_get_power(self) -> Any: ...
+    async def async_get_devices(self) -> Any: ...
 
 
 class AZRouterIntegrationApiClientError(Exception):
