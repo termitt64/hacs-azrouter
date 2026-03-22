@@ -4,14 +4,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
+from homeassistant.components.switch import SwitchEntity
 
 from .entity import AZRouterIntegrationEntity
-from .entity_description import create_entity_factory
+from .entity_description import SwitchSpec, create_entity_factory
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
-    from homeassistant.helpers.device_registry import DeviceInfo
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
     from .coordinator import AZRouterDataUpdateCoordinator
@@ -28,9 +27,7 @@ async def async_setup_entry(
     factory = create_entity_factory(coordinator)
 
     async_add_entities(
-        AZRouterIntegrationSwitch(
-            coordinator, spec.description, spec.path, spec.device_info
-        )
+        AZRouterIntegrationSwitch(coordinator, spec)
         for spec in factory.switch_descriptions()
     )
 
@@ -43,28 +40,31 @@ class AZRouterIntegrationSwitch(AZRouterIntegrationEntity, SwitchEntity):
     def __init__(
         self,
         coordinator: AZRouterDataUpdateCoordinator,
-        entity_description: SwitchEntityDescription,
-        path: str,
-        device_info: DeviceInfo | None = None,
+        spec: SwitchSpec,
     ) -> None:
         """Initialize the switch class."""
-        super().__init__(coordinator, path, device_info)
-        self.entity_description = entity_description
+        super().__init__(coordinator, device_info=spec.device_info)
+        self.entity_description = spec.description
         self._attr_unique_id = (
-            f"{coordinator.config_entry.entry_id}_{entity_description.key}"
+            f"{coordinator.config_entry.entry_id}_{spec.description.key}"
         )
+        self._spec = spec
 
     @property
     def is_on(self) -> bool:
         """Return true if the switch is on."""
-        return bool(self.raw_value)
+        return bool(self._spec.accessor.extract(self.coordinator.data))
 
     async def async_turn_on(self, **_: Any) -> None:
         """Turn on the switch."""
-        await self.coordinator.config_entry.runtime_data.client.async_set_title("bar")
-        await self.coordinator.async_request_refresh()
+        client = self.coordinator.config_entry.runtime_data.client
+        await self._spec.request.async_execute(client, value=True)
+        self._spec.accessor.set(self.coordinator.data, 1)
+        self.async_write_ha_state()
 
     async def async_turn_off(self, **_: Any) -> None:
         """Turn off the switch."""
-        await self.coordinator.config_entry.runtime_data.client.async_set_title("foo")
-        await self.coordinator.async_request_refresh()
+        client = self.coordinator.config_entry.runtime_data.client
+        await self._spec.request.async_execute(client, value=False)
+        self._spec.accessor.set(self.coordinator.data, 0)
+        self.async_write_ha_state()

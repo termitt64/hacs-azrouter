@@ -14,6 +14,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
+from homeassistant.components.switch import SwitchEntityDescription
 from homeassistant.const import (
     SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
     UnitOfPower,
@@ -21,6 +22,7 @@ from homeassistant.const import (
     UnitOfTime,
 )
 
+from .data_value_accessor import ApiRequestComposer, DataValueWriter  # noqa: TC001
 from .device import AZCharger, AZDeviceBase, AZDeviceFactory, AZRouter
 
 if TYPE_CHECKING:
@@ -50,6 +52,16 @@ class BinarySensorSpec:
     device_info: DeviceInfo | None = field(default=None)
 
 
+@dataclass
+class SwitchSpec:
+    """Bundles a SwitchEntityDescription with its accessor, request composer, and device."""
+
+    description: SwitchEntityDescription
+    accessor: DataValueWriter
+    request: ApiRequestComposer
+    device_info: DeviceInfo | None = field(default=None)
+
+
 # ── Per-device-type description providers ─────────────────────────────────────
 
 
@@ -62,6 +74,10 @@ class _DeviceDescriptionProvider:
 
     def binary_sensor_specs(self) -> list[BinarySensorSpec]:
         """Return binary sensor specs for this device."""
+        return []
+
+    def switch_specs(self) -> list[SwitchSpec]:
+        """Return switch specs for this device."""
         return []
 
 
@@ -134,13 +150,22 @@ class _RouterDescriptions(_DeviceDescriptionProvider):
                 path="status.system.hdo",
                 device_info=self._di,
             ),
-            BinarySensorSpec(
-                description=BinarySensorEntityDescription(
+        ]
+
+    def switch_specs(self) -> list[SwitchSpec]:
+        """Return router switch specs."""
+        return [
+            SwitchSpec(
+                description=SwitchEntityDescription(
                     key="master_boost",
                     name="Master Boost",
                     icon="mdi:rocket-launch",
                 ),
-                path="status.system.masterBoost",
+                accessor=DataValueWriter("status.system.masterBoost"),
+                request=ApiRequestComposer(
+                    resource="system/boost",
+                    payload_path="data.boost",
+                ),
                 device_info=self._di,
             ),
         ]
@@ -152,6 +177,7 @@ class _ChargerDescriptions(_DeviceDescriptionProvider):
     def __init__(self, device: AZCharger, charger_index: int) -> None:
         self._di: DeviceInfo = device.get_device_info()
         self._i = charger_index  # position in coordinator data["devices"] array
+        self._device_id: int = device._raw_data["common"]["id"]
 
     def sensor_specs(self) -> list[SensorSpec]:
         """Return charger sensor specs."""
@@ -193,17 +219,22 @@ class _ChargerDescriptions(_DeviceDescriptionProvider):
             ),
         ]
 
-    def binary_sensor_specs(self) -> list[BinarySensorSpec]:
-        """Return charger binary sensor specs."""
+    def switch_specs(self) -> list[SwitchSpec]:
+        """Return charger switch specs."""
         i = self._i
         return [
-            BinarySensorSpec(
-                description=BinarySensorEntityDescription(
+            SwitchSpec(
+                description=SwitchEntityDescription(
                     key=f"charger_{i}_boost",
                     name="Boost",
                     icon="mdi:rocket-launch",
                 ),
-                path=f"devices.{i}.charge.boost",
+                accessor=DataValueWriter(f"devices.{i}.charge.boost"),
+                request=ApiRequestComposer(
+                    resource="device/boost",
+                    payload_path="data.boost",
+                    payload_base={"data": {"device": {"common": {"id": self._device_id}}}},
+                ),
                 device_info=self._di,
             ),
         ]
@@ -248,6 +279,6 @@ class EntityDescriptionFactory:
         """Return all binary sensor specs across all devices."""
         return [spec for p in self._providers for spec in p.binary_sensor_specs()]
 
-    def switch_descriptions(self) -> list:
+    def switch_descriptions(self) -> list[SwitchSpec]:
         """Return all switch specs across all devices."""
-        return []
+        return [spec for p in self._providers for spec in p.switch_specs()]

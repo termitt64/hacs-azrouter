@@ -4,17 +4,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from homeassistant.components.binary_sensor import (
-    BinarySensorEntity,
-    BinarySensorEntityDescription,
-)
+from homeassistant.components.binary_sensor import BinarySensorEntity
 
 from .entity import AZRouterIntegrationEntity
-from .entity_description import create_entity_factory
+from .entity_description import BinarySensorSpec, create_entity_factory
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
-    from homeassistant.helpers.device_registry import DeviceInfo
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
     from .coordinator import AZRouterDataUpdateCoordinator
@@ -31,7 +27,7 @@ async def async_setup_entry(
     factory = create_entity_factory(coordinator)
 
     async_add_entities(
-        AZRouterIntegrationBinarySensor(coordinator, spec.description, spec.path, spec.device_info)
+        AZRouterIntegrationBinarySensor(coordinator, spec)
         for spec in factory.binary_sensor_descriptions()
     )
 
@@ -44,14 +40,14 @@ class AZRouterIntegrationBinarySensor(AZRouterIntegrationEntity, BinarySensorEnt
     def __init__(
         self,
         coordinator: AZRouterDataUpdateCoordinator,
-        entity_description: BinarySensorEntityDescription,
-        path: str,
-        device_info: DeviceInfo | None = None,
+        spec: BinarySensorSpec,
     ) -> None:
         """Initialize the binary_sensor class."""
-        super().__init__(coordinator, path, device_info)
-        self.entity_description = entity_description
-        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_{entity_description.key}"
+        super().__init__(coordinator, spec.path, spec.device_info)
+        self.entity_description = spec.description
+        self._attr_unique_id = (
+            f"{coordinator.config_entry.entry_id}_{spec.description.key}"
+        )
 
     @property
     def is_on(self) -> bool:

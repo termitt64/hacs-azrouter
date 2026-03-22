@@ -4,14 +4,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
+from homeassistant.components.sensor import SensorEntity
 
 from .entity import AZRouterIntegrationEntity
-from .entity_description import create_entity_factory
+from .entity_description import SensorSpec, create_entity_factory
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
-    from homeassistant.helpers.device_registry import DeviceInfo
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
     from .coordinator import AZRouterDataUpdateCoordinator
@@ -28,7 +27,7 @@ async def async_setup_entry(
     factory = create_entity_factory(coordinator)
 
     async_add_entities(
-        AZRouterIntegrationSensor(coordinator, spec.description, spec.path, spec.device_info)
+        AZRouterIntegrationSensor(coordinator, spec)
         for spec in factory.sensor_descriptions()
     )
 
@@ -41,14 +40,14 @@ class AZRouterIntegrationSensor(AZRouterIntegrationEntity, SensorEntity):
     def __init__(
         self,
         coordinator: AZRouterDataUpdateCoordinator,
-        entity_description: SensorEntityDescription,
-        path: str,
-        device_info: DeviceInfo | None = None,
+        spec: SensorSpec,
     ) -> None:
         """Initialize the sensor class."""
-        super().__init__(coordinator, path, device_info)
-        self.entity_description = entity_description
-        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_{entity_description.key}"
+        super().__init__(coordinator, spec.path, spec.device_info)
+        self.entity_description = spec.description
+        self._attr_unique_id = (
+            f"{coordinator.config_entry.entry_id}_{spec.description.key}"
+        )
 
     @property
     def native_value(self) -> str | None:
