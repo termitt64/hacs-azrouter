@@ -28,7 +28,9 @@ async def async_setup_entry(
     factory = create_entity_factory(coordinator)
 
     async_add_entities(
-        AZRouterIntegrationSwitch(coordinator, spec.description, spec.path, spec.device_info)
+        AZRouterIntegrationSwitch(
+            coordinator, spec.description, spec.path, spec.device_info
+        )
         for spec in factory.switch_descriptions()
     )
 
@@ -48,7 +50,9 @@ class AZRouterIntegrationSwitch(AZRouterIntegrationEntity, SwitchEntity):
         """Initialize the switch class."""
         super().__init__(coordinator, path, device_info)
         self.entity_description = entity_description
-        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_{entity_description.key}"
+        self._attr_unique_id = (
+            f"{coordinator.config_entry.entry_id}_{entity_description.key}"
+        )
 
     @property
     def is_on(self) -> bool:
