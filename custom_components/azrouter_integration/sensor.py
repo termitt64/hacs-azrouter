@@ -43,7 +43,7 @@ class AZRouterIntegrationSensor(AZRouterIntegrationEntity, SensorEntity):
         spec: SensorSpec,
     ) -> None:
         """Initialize the sensor class."""
-        super().__init__(coordinator, spec.path, spec.device_info)
+        super().__init__(coordinator, spec.device_info, spec.path)
         self.entity_description = spec.description
         self._attr_unique_id = (
             f"{coordinator.config_entry.entry_id}_{spec.description.key}"

@@ -43,7 +43,7 @@ class AZRouterIntegrationSwitch(AZRouterIntegrationEntity, SwitchEntity):
         spec: SwitchSpec,
     ) -> None:
         """Initialize the switch class."""
-        super().__init__(coordinator, device_info=spec.device_info)
+        super().__init__(coordinator, spec.device_info)
         self.entity_description = spec.description
         self._attr_unique_id = (
             f"{coordinator.config_entry.entry_id}_{spec.description.key}"

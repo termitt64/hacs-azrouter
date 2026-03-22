@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from homeassistant.components.binary_sensor import (
@@ -22,7 +22,7 @@ from homeassistant.const import (
     UnitOfTime,
 )
 
-from .data_value_accessor import ApiRequestComposer, DataValueWriter  # noqa: TC001
+from .data_value_accessor import ApiRequestComposer, DataValueWriter
 from .device import AZCharger, AZDeviceBase, AZDeviceFactory, AZRouter
 
 if TYPE_CHECKING:
@@ -40,7 +40,7 @@ class SensorSpec:
 
     description: SensorEntityDescription
     path: str
-    device_info: DeviceInfo | None = field(default=None)
+    device_info: DeviceInfo
 
 
 @dataclass
@@ -49,17 +49,17 @@ class BinarySensorSpec:
 
     description: BinarySensorEntityDescription
     path: str
-    device_info: DeviceInfo | None = field(default=None)
+    device_info: DeviceInfo
 
 
 @dataclass
 class SwitchSpec:
-    """Bundles a SwitchEntityDescription with its accessor, request composer, and device."""
+    """Bundles a SwitchEntityDescription with its accessor, request, and device info."""
 
     description: SwitchEntityDescription
     accessor: DataValueWriter
     request: ApiRequestComposer
-    device_info: DeviceInfo | None = field(default=None)
+    device_info: DeviceInfo
 
 
 # ── Per-device-type description providers ─────────────────────────────────────

@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .data_value_accessor import DataValueAccessor
+if TYPE_CHECKING:
+    from homeassistant.helpers.device_registry import DeviceInfo
 
-from .const import ATTRIBUTION, DOMAIN
+from .const import ATTRIBUTION
 from .coordinator import AZRouterDataUpdateCoordinator
+from .data_value_accessor import DataValueAccessor
 
 
 class AZRouterIntegrationEntity(CoordinatorEntity[AZRouterDataUpdateCoordinator]):
@@ -21,20 +22,13 @@ class AZRouterIntegrationEntity(CoordinatorEntity[AZRouterDataUpdateCoordinator]
     def __init__(
         self,
         coordinator: AZRouterDataUpdateCoordinator,
+        device_info: DeviceInfo,
         path: str = "",
-        device_info: DeviceInfo | None = None,
     ) -> None:
         """Initialize."""
         super().__init__(coordinator)
         self._attr_unique_id = coordinator.config_entry.entry_id
-        self._attr_device_info = device_info or DeviceInfo(
-            identifiers={
-                (
-                    DOMAIN,
-                    coordinator.config_entry.entry_id,
-                ),
-            },
-        )
+        self._attr_device_info = device_info
 
         self._value_accessor = DataValueAccessor(path) if path else None
 
