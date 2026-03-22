@@ -74,6 +74,11 @@ class AZCharger(AZDeviceBase):
         super().__init__(dev_data)
         self._router_mac = router_mac
 
+    @property
+    def device_id(self) -> int:
+        """Return the device id."""
+        return self._raw_data["common"]["id"]
+
     def get_device_info(self) -> DeviceInfo:
         """Create HA DeviceInfo object."""
         c = self._raw_data["common"]

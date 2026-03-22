@@ -177,7 +177,7 @@ class _ChargerDescriptions(_DeviceDescriptionProvider):
     def __init__(self, device: AZCharger, charger_index: int) -> None:
         self._di: DeviceInfo = device.get_device_info()
         self._i = charger_index  # position in coordinator data["devices"] array
-        self._device_id: int = device._raw_data["common"]["id"]
+        self._device_id: int = device.device_id
 
     def sensor_specs(self) -> list[SensorSpec]:
         """Return charger sensor specs."""
@@ -233,7 +233,9 @@ class _ChargerDescriptions(_DeviceDescriptionProvider):
                 request=ApiRequestComposer(
                     resource="device/boost",
                     payload_path="data.boost",
-                    payload_base={"data": {"device": {"common": {"id": self._device_id}}}},
+                    payload_base={
+                        "data": {"device": {"common": {"id": self._device_id}}}
+                    },
                 ),
                 device_info=self._di,
             ),
