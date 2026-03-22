@@ -23,3 +23,17 @@ class DataValueAccessor:
         else:
             value = data.get(self._key)
         return self._proxy.extract(value) if value is not None and self._proxy else value
+
+    def set(self, data: dict | list, value: Any) -> None:
+        """Set value in given data (dict or list) at this path."""
+        if isinstance(data, list):
+            idx = int(self._key)
+            if self._proxy is None:
+                data[idx] = value
+            else:
+                self._proxy.set(data[idx], value)
+        else:
+            if self._proxy is None:
+                data[self._key] = value
+            else:
+                self._proxy.set(data[self._key], value)
