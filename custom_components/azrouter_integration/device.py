@@ -5,15 +5,28 @@ Main purpose is to ease creation of DeviceInfo.
 """
 
 from abc import ABC, abstractmethod
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any
 
 from homeassistant.helpers.device_registry import DeviceInfo
 
-from custom_components.azrouter_integration.data_value_accessor import DataValueAccessor
-
-from .const import DOMAIN
+from .const import DOMAIN, LOGGER
 from .coordinator import AZRouterDataUpdateCoordinator
+from .data_value_accessor import DataValueAccessor
+
+# Registry mapping deviceType strings to device classes.
+# Register new device types with @register_device_type("<type>").
+_DEVICE_TYPE_REGISTRY: dict[str, type] = {}
+
+
+def register_device_type(device_type: str) -> Callable[[type], type]:
+    """Register a device class for a given deviceType string - Decorator."""
+
+    def decorator(cls: type) -> type:
+        _DEVICE_TYPE_REGISTRY[device_type] = cls
+        return cls
+
+    return decorator
 
 
 class AZDeviceBase(ABC):
@@ -52,6 +65,7 @@ class AZRouter(AZDeviceBase):
         )
 
 
+@register_device_type("4")
 class AZCharger(AZDeviceBase):
     """Representation of an AZ Charger device linked to the router."""
 
@@ -95,6 +109,11 @@ class AZDeviceFactory:
 
         router_mac = system_data.get("mac", "")
         for dev_data in self._coordinator.data.get("devices", []):
-            devices.append(AZCharger(dev_data, router_mac))
+            device_type = str(dev_data.get("deviceType", ""))
+            cls = _DEVICE_TYPE_REGISTRY.get(device_type)
+            if cls is not None:
+                devices.append(cls(dev_data, router_mac))
+            else:
+                LOGGER.warning("Unknown device type %s — skipping", device_type)
 
         return devices
