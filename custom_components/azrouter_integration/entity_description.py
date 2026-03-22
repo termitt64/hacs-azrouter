@@ -46,18 +46,25 @@ class BinarySensorSpec:
     path: str
     device_info: DeviceInfo | None = field(default=None)
 
+def create_entity_factory(coordinator: AZRouterDataUpdateCoordinator) -> EntityDescriptionFactory:
+    """Build an EntityDescriptionFactory from coordinator data."""
+    devices = AZDeviceFactory(coordinator).create_devices()
+    return EntityDescriptionFactory(
+        router_device=devices[0].get_device_info(),
+        charger_device=devices[1].get_device_info() if len(devices) > 1 else None,
+    )
 
 class EntityDescriptionFactory:
-    """Build entity descriptions from live coordinator data."""
+    """Build entity descriptions given resolved device infos."""
 
-    def __init__(self, coordinator: AZRouterDataUpdateCoordinator) -> None:
-        """Initialise factory and resolve device infos."""
-        self._coordinator = coordinator
-        devices = AZDeviceFactory(coordinator).create_devices()
-        self._router_device: DeviceInfo = devices[0].get_device_info()
-        self._charger_device: DeviceInfo | None = (
-            devices[1].get_device_info() if len(devices) > 1 else None
-        )
+    def __init__(
+        self,
+        router_device: DeviceInfo,
+        charger_device: DeviceInfo | None = None,
+    ) -> None:
+        """Initialise factory with pre-built device infos."""
+        self._router_device = router_device
+        self._charger_device = charger_device
 
     def sensor_descriptions(self) -> list[SensorSpec]:
         """Return sensor specs for all platforms."""

@@ -10,7 +10,7 @@ from homeassistant.components.binary_sensor import (
 )
 
 from .entity import AZRouterIntegrationEntity
-from .entity_description import EntityDescriptionFactory
+from .entity_description import create_entity_factory
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -28,7 +28,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up the binary_sensor platform."""
     coordinator = entry.runtime_data.coordinator
-    factory = EntityDescriptionFactory(coordinator)
+    factory = create_entity_factory(coordinator)
 
     async_add_entities(
         AZRouterIntegrationBinarySensor(coordinator, spec.description, spec.path, spec.device_info)

@@ -7,7 +7,7 @@ from typing import Any
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from custom_components.azrouter_integration.data_value_accessor import DataValueAccessor
+from .data_value_accessor import DataValueAccessor
 
 from .const import ATTRIBUTION, DOMAIN
 from .coordinator import AZRouterDataUpdateCoordinator
