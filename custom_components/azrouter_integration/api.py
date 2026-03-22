@@ -18,11 +18,20 @@ API_URL: Final = "/api/v1/"
 class AZRouterApiClientProtocol(Protocol):
     """Protocol defining the AZ Router API client interface."""
 
-    async def async_get_cloud_status(self) -> Any: ...
-    async def async_get_status(self) -> Any: ...
-    async def async_get_power(self) -> Any: ...
-    async def async_get_devices(self) -> Any: ...
-    async def async_post(self, resource: str, data: dict) -> Any: ...
+    async def async_get_cloud_status(self) -> Any:
+        """Get cloud status."""
+
+    async def async_get_status(self) -> Any:
+        """Get system status."""
+
+    async def async_get_power(self) -> Any:
+        """Get power data."""
+
+    async def async_get_devices(self) -> Any:
+        """Get devices."""
+
+    async def async_post(self, resource: str, data: dict) -> Any:
+        """Post data to a resource."""
 
 
 class AZRouterIntegrationApiClientError(Exception):
