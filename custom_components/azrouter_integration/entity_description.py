@@ -134,6 +134,15 @@ class _RouterDescriptions(_DeviceDescriptionProvider):
                 path="status.system.hdo",
                 device_info=self._di,
             ),
+            BinarySensorSpec(
+                description=BinarySensorEntityDescription(
+                    key="master_boost",
+                    name="Master Boost",
+                    icon="mdi:rocket-launch",
+                ),
+                path="status.system.masterBoost",
+                device_info=self._di,
+            ),
         ]
 
 
@@ -170,6 +179,31 @@ class _ChargerDescriptions(_DeviceDescriptionProvider):
                     state_class=SensorStateClass.MEASUREMENT,
                 ),
                 path=f"devices.{i}.common.signal",
+                device_info=self._di,
+            ),
+            SensorSpec(
+                description=SensorEntityDescription(
+                    key=f"charger_{i}_boost_source",
+                    name="Boost Source",
+                    icon="mdi:rocket-launch-outline",
+                    state_class=SensorStateClass.MEASUREMENT,
+                ),
+                path=f"devices.{i}.charge.boostSource",
+                device_info=self._di,
+            ),
+        ]
+
+    def binary_sensor_specs(self) -> list[BinarySensorSpec]:
+        """Return charger binary sensor specs."""
+        i = self._i
+        return [
+            BinarySensorSpec(
+                description=BinarySensorEntityDescription(
+                    key=f"charger_{i}_boost",
+                    name="Boost",
+                    icon="mdi:rocket-launch",
+                ),
+                path=f"devices.{i}.charge.boost",
                 device_info=self._di,
             ),
         ]
