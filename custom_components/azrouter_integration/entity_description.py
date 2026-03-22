@@ -21,12 +21,15 @@ from homeassistant.const import (
     UnitOfTime,
 )
 
-from .device import AZDeviceFactory
+from .device import AZCharger, AZDeviceBase, AZDeviceFactory, AZRouter
 
 if TYPE_CHECKING:
     from homeassistant.helpers.device_registry import DeviceInfo
 
     from .coordinator import AZRouterDataUpdateCoordinator
+
+
+# ── Spec dataclasses ──────────────────────────────────────────────────────────
 
 
 @dataclass
@@ -46,30 +49,31 @@ class BinarySensorSpec:
     path: str
     device_info: DeviceInfo | None = field(default=None)
 
-def create_entity_factory(coordinator: AZRouterDataUpdateCoordinator) -> EntityDescriptionFactory:
-    """Build an EntityDescriptionFactory from coordinator data."""
-    devices = AZDeviceFactory(coordinator).create_devices()
-    return EntityDescriptionFactory(
-        router_device=devices[0].get_device_info(),
-        charger_device=devices[1].get_device_info() if len(devices) > 1 else None,
-    )
 
-class EntityDescriptionFactory:
-    """Build entity descriptions given resolved device infos."""
+# ── Per-device-type description providers ─────────────────────────────────────
 
-    def __init__(
-        self,
-        router_device: DeviceInfo,
-        charger_device: DeviceInfo | None = None,
-    ) -> None:
-        """Initialise factory with pre-built device infos."""
-        self._router_device = router_device
-        self._charger_device = charger_device
 
-    def sensor_descriptions(self) -> list[SensorSpec]:
-        """Return sensor specs for all platforms."""
-        specs: list[SensorSpec] = [
-            # ── Router ────────────────────────────────────────────────
+class _DeviceDescriptionProvider:
+    """Base provider — returns empty lists; subclasses override what they need."""
+
+    def sensor_specs(self) -> list[SensorSpec]:
+        """Return sensor specs for this device."""
+        return []
+
+    def binary_sensor_specs(self) -> list[BinarySensorSpec]:
+        """Return binary sensor specs for this device."""
+        return []
+
+
+class _RouterDescriptions(_DeviceDescriptionProvider):
+    """Description provider for the AZ Router device."""
+
+    def __init__(self, device: AZRouter) -> None:
+        self._di: DeviceInfo = device.get_device_info()
+
+    def sensor_specs(self) -> list[SensorSpec]:
+        """Return router sensor specs."""
+        return [
             SensorSpec(
                 description=SensorEntityDescription(
                     key="router_uptime",
@@ -81,7 +85,7 @@ class EntityDescriptionFactory:
                     state_class=SensorStateClass.TOTAL_INCREASING,
                 ),
                 path="status.system.uptime",
-                device_info=self._router_device,
+                device_info=self._di,
             ),
             SensorSpec(
                 description=SensorEntityDescription(
@@ -93,7 +97,7 @@ class EntityDescriptionFactory:
                     state_class=SensorStateClass.MEASUREMENT,
                 ),
                 path="status.system.temperature",
-                device_info=self._router_device,
+                device_info=self._di,
             ),
             SensorSpec(
                 description=SensorEntityDescription(
@@ -105,43 +109,12 @@ class EntityDescriptionFactory:
                     state_class=SensorStateClass.MEASUREMENT,
                 ),
                 path="status.activeDevice.maxPower",
-                device_info=self._router_device,
+                device_info=self._di,
             ),
         ]
 
-        if self._charger_device is not None:
-            specs += [
-                # ── AZ Charger ────────────────────────────────────────
-                SensorSpec(
-                    description=SensorEntityDescription(
-                        key="charger_total_power",
-                        name="Charging Power",
-                        icon="mdi:ev-station",
-                        device_class=SensorDeviceClass.POWER,
-                        native_unit_of_measurement=UnitOfPower.WATT,
-                        state_class=SensorStateClass.MEASUREMENT,
-                    ),
-                    path="devices.0.charge.totalPower",
-                    device_info=self._charger_device,
-                ),
-                SensorSpec(
-                    description=SensorEntityDescription(
-                        key="charger_signal",
-                        name="WiFi Signal",
-                        icon="mdi:wifi",
-                        device_class=SensorDeviceClass.SIGNAL_STRENGTH,
-                        native_unit_of_measurement=SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
-                        state_class=SensorStateClass.MEASUREMENT,
-                    ),
-                    path="devices.0.common.signal",
-                    device_info=self._charger_device,
-                ),
-            ]
-
-        return specs
-
-    def binary_sensor_descriptions(self) -> list[BinarySensorSpec]:
-        """Return binary sensor specs for all platforms."""
+    def binary_sensor_specs(self) -> list[BinarySensorSpec]:
+        """Return router binary sensor specs."""
         return [
             BinarySensorSpec(
                 description=BinarySensorEntityDescription(
@@ -150,7 +123,7 @@ class EntityDescriptionFactory:
                     device_class=BinarySensorDeviceClass.CONNECTIVITY,
                 ),
                 path="status.cloud.reachable",
-                device_info=self._router_device,
+                device_info=self._di,
             ),
             BinarySensorSpec(
                 description=BinarySensorEntityDescription(
@@ -159,6 +132,88 @@ class EntityDescriptionFactory:
                     icon="mdi:transmission-tower",
                 ),
                 path="status.system.hdo",
-                device_info=self._router_device,
+                device_info=self._di,
             ),
         ]
+
+
+class _ChargerDescriptions(_DeviceDescriptionProvider):
+    """Description provider for an AZ Charger device."""
+
+    def __init__(self, device: AZCharger, charger_index: int) -> None:
+        self._di: DeviceInfo = device.get_device_info()
+        self._i = charger_index  # position in coordinator data["devices"] array
+
+    def sensor_specs(self) -> list[SensorSpec]:
+        """Return charger sensor specs."""
+        i = self._i
+        return [
+            SensorSpec(
+                description=SensorEntityDescription(
+                    key=f"charger_{i}_total_power",
+                    name="Charging Power",
+                    icon="mdi:ev-station",
+                    device_class=SensorDeviceClass.POWER,
+                    native_unit_of_measurement=UnitOfPower.WATT,
+                    state_class=SensorStateClass.MEASUREMENT,
+                ),
+                path=f"devices.{i}.charge.totalPower",
+                device_info=self._di,
+            ),
+            SensorSpec(
+                description=SensorEntityDescription(
+                    key=f"charger_{i}_signal",
+                    name="WiFi Signal",
+                    icon="mdi:wifi",
+                    device_class=SensorDeviceClass.SIGNAL_STRENGTH,
+                    native_unit_of_measurement=SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+                    state_class=SensorStateClass.MEASUREMENT,
+                ),
+                path=f"devices.{i}.common.signal",
+                device_info=self._di,
+            ),
+        ]
+
+
+# ── Factory ───────────────────────────────────────────────────────────────────
+
+
+def create_entity_factory(
+    coordinator: AZRouterDataUpdateCoordinator,
+) -> EntityDescriptionFactory:
+    """Build an EntityDescriptionFactory from coordinator data."""
+    return EntityDescriptionFactory(AZDeviceFactory(coordinator).create_devices())
+
+
+class EntityDescriptionFactory:
+    """Aggregates entity specs from per-device-type description providers."""
+
+    def __init__(self, device_list: list[AZDeviceBase]) -> None:
+        """Build providers from the given device list."""
+        self._providers = self._build_providers(device_list)
+
+    @staticmethod
+    def _build_providers(
+        device_list: list[AZDeviceBase],
+    ) -> list[_DeviceDescriptionProvider]:
+        providers: list[_DeviceDescriptionProvider] = []
+        charger_index = 0
+        for device in device_list:
+            if isinstance(device, AZRouter):
+                providers.append(_RouterDescriptions(device))
+            elif isinstance(device, AZCharger):
+                providers.append(_ChargerDescriptions(device, charger_index))
+                charger_index += 1
+        return providers
+
+    def sensor_descriptions(self) -> list[SensorSpec]:
+        """Return all sensor specs across all devices."""
+        return [spec for p in self._providers for spec in p.sensor_specs()]
+
+    def binary_sensor_descriptions(self) -> list[BinarySensorSpec]:
+        """Return all binary sensor specs across all devices."""
+        return [spec for p in self._providers for spec in p.binary_sensor_specs()]
+
+    def switch_descriptions(self) -> list:
+        """Return all switch specs across all devices."""
+        return []
