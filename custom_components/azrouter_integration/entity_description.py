@@ -22,7 +22,8 @@ from homeassistant.const import (
     UnitOfTime,
 )
 
-from .data_value_accessor import ApiRequestComposer, DataValueWriter
+from .api_request_composer import ApiRequestComposer, BoolToNumConverter
+from .data_value_accessor import DataValueAccessor, DataValueWriter
 from .device import AZCharger, AZDeviceBase, AZDeviceFactory, AZRouter
 
 if TYPE_CHECKING:
@@ -57,8 +58,8 @@ class SwitchSpec:
     """Bundles a SwitchEntityDescription with its accessor, request, and device info."""
 
     description: SwitchEntityDescription
-    accessor: DataValueWriter
-    request: ApiRequestComposer
+    reader: DataValueAccessor
+    writer: ApiRequestComposer
     device_info: DeviceInfo
 
 
@@ -161,10 +162,11 @@ class _RouterDescriptions(_DeviceDescriptionProvider):
                     name="Master Boost",
                     icon="mdi:rocket-launch",
                 ),
-                accessor=DataValueWriter("status.system.masterBoost"),
-                request=ApiRequestComposer(
+                reader=DataValueAccessor("status.system.masterBoost"),
+                writer=ApiRequestComposer(
                     resource="system/boost",
                     payload_path="data.boost",
+                    value_converter=BoolToNumConverter(),
                 ),
                 device_info=self._di,
             ),
@@ -229,10 +231,11 @@ class _ChargerDescriptions(_DeviceDescriptionProvider):
                     name="Boost",
                     icon="mdi:rocket-launch",
                 ),
-                accessor=DataValueWriter(f"devices.{i}.charge.boost"),
-                request=ApiRequestComposer(
+                reader=DataValueAccessor(f"devices.{i}.charge.boost"),
+                writer=ApiRequestComposer(
                     resource="device/boost",
                     payload_path="data.boost",
+                    value_converter=BoolToNumConverter(),
                     payload_base={
                         "data": {"device": {"common": {"id": self._device_id}}}
                     },
