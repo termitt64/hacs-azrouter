@@ -33,7 +33,7 @@ async def async_setup_entry(
 
 
 class AZRouterIntegrationBinarySensor(AZRouterIntegrationEntity, BinarySensorEntity):
-    """azrouter_integration binary_sensor class."""
+    """Binary sensor entity for an AZRouter boolean data point read from coordinator data."""
 
     _attr_has_entity_name = True
 
@@ -51,5 +51,5 @@ class AZRouterIntegrationBinarySensor(AZRouterIntegrationEntity, BinarySensorEnt
 
     @property
     def is_on(self) -> bool:
-        """Return true if the binary_sensor is on."""
+        """Return True if the coordinator data point is truthy."""
         return bool(self.raw_value)

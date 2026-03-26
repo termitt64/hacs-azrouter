@@ -84,7 +84,7 @@ class AZRouterConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     async def _test_credentials(self, url: str, username: str, password: str) -> None:
-        """Validate credentials."""
+        """Attempt to connect and authenticate with the router to verify credentials."""
         client = AZRouterIntegrationApiClient(
             base_url=url,
             username=username,

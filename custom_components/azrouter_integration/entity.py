@@ -15,7 +15,7 @@ from .data_value_accessor import DataValueAccessor
 
 
 class AZRouterIntegrationEntity(CoordinatorEntity[AZRouterDataUpdateCoordinator]):
-    """AZRouterEntity class."""
+    """Base entity for all AZRouter integration entities, backed by the data coordinator."""
 
     _attr_attribution = ATTRIBUTION
 
@@ -25,7 +25,7 @@ class AZRouterIntegrationEntity(CoordinatorEntity[AZRouterDataUpdateCoordinator]
         device_info: DeviceInfo,
         path: str = "",
     ) -> None:
-        """Initialize."""
+        """Bind the entity to the coordinator, device, and optional dot-path accessor."""
         super().__init__(coordinator)
         self._attr_unique_id = coordinator.config_entry.entry_id
         self._attr_device_info = device_info
@@ -34,7 +34,7 @@ class AZRouterIntegrationEntity(CoordinatorEntity[AZRouterDataUpdateCoordinator]
 
     @property
     def raw_value(self) -> Any:
-        """Get value from Coordinator.data by given Path."""
+        """Extract the current value from coordinator data using the configured dot-path accessor."""
         if self._value_accessor:
             return self._value_accessor.extract(self.coordinator.data)
 

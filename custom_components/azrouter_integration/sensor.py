@@ -33,7 +33,7 @@ async def async_setup_entry(
 
 
 class AZRouterIntegrationSensor(AZRouterIntegrationEntity, SensorEntity):
-    """azrouter_integration Sensor class."""
+    """Sensor entity for an AZRouter data point read from coordinator data."""
 
     _attr_has_entity_name = True
 
@@ -51,5 +51,5 @@ class AZRouterIntegrationSensor(AZRouterIntegrationEntity, SensorEntity):
 
     @property
     def native_value(self) -> str | None:
-        """Return the native value of the sensor."""
+        """Return the sensor value extracted from coordinator data."""
         return self.raw_value

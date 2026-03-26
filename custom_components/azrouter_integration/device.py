@@ -102,6 +102,7 @@ class AZDeviceFactory:
         self._coordinator = coordinator
 
     def _extract_data(self, path: str) -> Mapping[str, Any]:
+        """Extract a value from coordinator data at the given dot-separated path."""
         return DataValueAccessor(path).extract(self._coordinator.data)
 
     def create_devices(self) -> list[AZDeviceBase]:

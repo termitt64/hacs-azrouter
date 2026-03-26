@@ -31,7 +31,7 @@ class AZRouterDataUpdateCoordinator(DataUpdateCoordinator):
         self,
         hass: HomeAssistant,
     ) -> None:
-        """Initialize."""
+        """Initialize the coordinator with a 1-hour polling interval."""
         super().__init__(
             hass=hass,
             logger=LOGGER,
@@ -40,7 +40,7 @@ class AZRouterDataUpdateCoordinator(DataUpdateCoordinator):
         )
 
     async def _async_update_data(self) -> Any:
-        """Update data via library."""
+        """Fetch cloud status, system status, power, and devices from the API."""
         try:
             client = self.config_entry.runtime_data.client
             data = {

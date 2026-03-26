@@ -86,6 +86,7 @@ class _RouterDescriptions(_DeviceDescriptionProvider):
     """Description provider for the AZ Router device."""
 
     def __init__(self, device: AZRouter) -> None:
+        """Initialize with the AZ Router device."""
         self._di: DeviceInfo = device.get_device_info()
 
     def sensor_specs(self) -> list[SensorSpec]:
@@ -177,6 +178,7 @@ class _ChargerDescriptions(_DeviceDescriptionProvider):
     """Description provider for an AZ Charger device."""
 
     def __init__(self, device: AZCharger, charger_index: int) -> None:
+        """Initialize with an AZ Charger device and its index in the devices array."""
         self._di: DeviceInfo = device.get_device_info()
         self._i = charger_index  # position in coordinator data["devices"] array
         self._device_id: int = device.device_id
@@ -266,6 +268,7 @@ class EntityDescriptionFactory:
     def _build_providers(
         device_list: list[AZDeviceBase],
     ) -> list[_DeviceDescriptionProvider]:
+        """Map each device to its description provider, tracking charger index for array paths."""
         providers: list[_DeviceDescriptionProvider] = []
         charger_index = 0
         for device in device_list:

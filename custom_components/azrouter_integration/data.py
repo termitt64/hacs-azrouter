@@ -18,7 +18,7 @@ type AZRouterIntegrationConfigEntry = ConfigEntry[AZRouterIntegrationData]
 
 @dataclass
 class AZRouterIntegrationData:
-    """Data for the Blueprint integration."""
+    """Runtime data stored in a config entry for the AZRouter integration."""
 
     client: AZRouterApiClientProtocol
     coordinator: AZRouterDataUpdateCoordinator

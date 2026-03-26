@@ -62,7 +62,7 @@ def _verify_response_or_raise(response: aiohttp.ClientResponse) -> None:
 
 
 class AZRouterIntegrationApiClient:
-    """Sample API Client."""
+    """HTTP client for the AZ Router REST API."""
 
     def __init__(
         self,
@@ -71,7 +71,7 @@ class AZRouterIntegrationApiClient:
         password: str,
         session: aiohttp.ClientSession,
     ) -> None:
-        """Sample API Client."""
+        """Initialize with base URL, credentials, and an aiohttp session."""
         self._username = username
         self._password = password
         self._api_url = urljoin(base_url, API_URL)
@@ -146,7 +146,7 @@ class AZRouterIntegrationApiClient:
         data: dict | None = None,
         headers: dict | None = None,
     ) -> Any:
-        """Get information from the API."""
+        """Execute an HTTP request, raising typed exceptions on error."""
         try:
             async with async_timeout.timeout(10):
                 LOGGER.debug("Request %s [%s]: %s", method, headers, data)
@@ -176,4 +176,5 @@ class AZRouterIntegrationApiClient:
             ) from exception
 
     def _get_resource_url(self, resource: str) -> str:
+        """Build the full URL for a given API resource path."""
         return urljoin(self._api_url, resource)

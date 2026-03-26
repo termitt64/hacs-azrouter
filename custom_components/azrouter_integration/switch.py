@@ -33,7 +33,7 @@ async def async_setup_entry(
 
 
 class AZRouterIntegrationSwitch(AZRouterIntegrationEntity, SwitchEntity):
-    """azrouter_integration switch class."""
+    """Switch entity for an AZRouter controllable boolean setting."""
 
     _attr_has_entity_name = True
 
@@ -64,6 +64,7 @@ class AZRouterIntegrationSwitch(AZRouterIntegrationEntity, SwitchEntity):
         await self._async_set_value(False)
 
     async def _async_set_value(self, value: bool) -> None:
+        """Send the new value to the API and optimistically update the entity state."""
         client = self.coordinator.config_entry.runtime_data.client
         await self._spec.writer.async_execute(client, value)
         self._attr_is_on = value

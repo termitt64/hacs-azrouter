@@ -23,6 +23,7 @@ class DataValueAccessor:
 
     class _ListExtractionStrategy(_ExtractionStrategy):
         def extract(self, data: Any, key: str) -> Any:
+            """Return the list item at index key, or None on invalid index."""
             try:
                 return data[int(key)]
             except (ValueError, IndexError):
@@ -30,6 +31,7 @@ class DataValueAccessor:
 
     class _DictExtractionStrategy(_ExtractionStrategy):
         def extract(self, data: Any, key: str) -> Any:
+            """Return the dict value for key, or None if absent."""
             return data.get(key)
 
     _LIST_STRATEGY = _ListExtractionStrategy()
@@ -73,16 +75,20 @@ class DataValueWriter(DataValueAccessor):
 
     class _ListInjectionStrategy(_InjectionStrategy):
         def inject(self, data: Any, key: str, value: Any) -> None:
+            """Set value at list index key."""
             data[int(key)] = value
 
         def traverse(self, data: Any, key: str) -> Any:
+            """Return the child list item at index key."""
             return data[int(key)]
 
     class _DictInjectionStrategy(_InjectionStrategy):
         def inject(self, data: Any, key: str, value: Any) -> None:
+            """Set value at dict key."""
             data[key] = value
 
         def traverse(self, data: Any, key: str) -> Any:
+            """Return the child dict at key, creating an empty dict if absent."""
             if key not in data:
                 data[key] = {}
             return data[key]
