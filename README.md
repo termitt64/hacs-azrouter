@@ -8,15 +8,29 @@
 
 [![Community Forum][forum-shield]][forum]
 
-_Integration to integrate with [hacs-azrouter][hacs-azrouter]._
+_Home Assistant integration for the [A-Z Traders Router SMART][hacs-azrouter] — a smart EV charging router that manages connected chargers. Polls the router locally over its REST API._
 
-**This integration will set up the following platforms.**
+**This integration sets up the following platforms.**
 
-Platform | Description
--- | --
-`binary_sensor` | Show something `True` or `False`.
-`sensor` | Show info from blueprint API.
-`switch` | Switch something `True` or `False`.
+### Router entities
+
+Platform | Entity | Description
+-- | -- | --
+`sensor` | Uptime | Router system uptime (reported in days)
+`sensor` | Temperature | Router CPU/board temperature in °C
+`sensor` | Active Device Max Power | Maximum power of the currently active device in W
+`binary_sensor` | Cloud | Whether the router can reach the A-Z cloud (`connectivity`)
+`binary_sensor` | HDO | State of the HDO (ripple control) signal
+`switch` | Master Boost | Enable/disable global boost mode on the router
+
+### Charger entities (per connected charger)
+
+Platform | Entity | Description
+-- | -- | --
+`sensor` | Charging Power | Total charging power in W
+`sensor` | WiFi Signal | Charger WiFi signal strength in dBm
+`sensor` | Boost Source | Source of the active boost command
+`switch` | Boost | Enable/disable boost mode on this charger
 
 ## Installation
 
@@ -30,8 +44,22 @@ Platform | Description
 
 ## Configuration
 
-TODO: Configuration how to & link
-Lorem ipsum ... tbd
+The integration is configured entirely through the Home Assistant UI — no `configuration.yaml` edits are needed.
+
+1. In the HA UI go to **Settings** → **Devices & Services** → **Integrations**, click **+ Add Integration**, and search for **AZRouter Integration**.
+2. Enter the following details:
+
+   | Field | Description |
+   | -- | -- |
+   | **URL** | Base URL of the router (e.g. `http://192.168.1.1`) |
+   | **Username** | Router admin username |
+   | **Password** | Router admin password |
+
+3. HA will verify the credentials by connecting to the router. If successful, the integration is ready.
+
+> Only one instance of this integration can be configured at a time (`single_config_entry`).
+
+Data is polled from the router once per hour.
 
 ## Contributions are welcome!
 
