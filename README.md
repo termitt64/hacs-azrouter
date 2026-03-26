@@ -34,13 +34,19 @@ Platform | Entity | Description
 
 ## Installation
 
-1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
-1. If you do not have a `custom_components` directory (folder) there, you need to create it.
-1. In the `custom_components` directory (folder) create a new folder called `azrouter_integration`.
-1. Download _all_ the files from the `custom_components/azrouter_integration/` directory (folder) in this repository.
-1. Place the files you downloaded in the new directory (folder) you created.
-1. Restart Home Assistant
-1. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "AZRouter Integration"
+### Option A — HACS (recommended)
+
+1. Make sure [HACS](https://hacs.xyz) is installed in your Home Assistant instance.
+1. In the HA UI go to **HACS** → **Integrations**, click the **⋮** menu in the top-right corner, and choose **Custom repositories**.
+1. Add `https://github.com/termitt64/hacs-azrouter` as a repository of category **Integration** and click **Add**.
+1. Search for **AZRouter Integration** in HACS and click **Download**.
+1. Restart Home Assistant.
+
+### Option B — Manual
+
+1. Download the latest release archive from the [Releases](https://github.com/termitt64/hacs-azrouter/releases) page.
+1. Unpack the archive and copy the `azrouter_integration` folder into the `custom_components` directory of your HA configuration (the same directory that contains `configuration.yaml`). Create `custom_components` if it does not exist yet.
+1. Restart Home Assistant.
 
 ## Configuration
 
