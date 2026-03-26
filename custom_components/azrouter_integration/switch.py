@@ -57,15 +57,15 @@ class AZRouterIntegrationSwitch(AZRouterIntegrationEntity, SwitchEntity):
 
     async def async_turn_on(self, **_: Any) -> None:
         """Turn on the switch."""
-        await self._async_set_value(True)
+        await self._async_set_value(turn_on=True)
 
     async def async_turn_off(self, **_: Any) -> None:
         """Turn off the switch."""
-        await self._async_set_value(False)
+        await self._async_set_value(turn_on=False)
 
-    async def _async_set_value(self, value: bool) -> None:
+    async def _async_set_value(self, turn_on: bool) -> None:  # noqa: FBT001
         """Send the new value to the API and optimistically update the entity state."""
         client = self.coordinator.config_entry.runtime_data.client
-        await self._spec.writer.async_execute(client, value)
-        self._attr_is_on = value
+        await self._spec.writer.async_execute(client, turn_on)
+        self._attr_is_on = turn_on
         self.async_write_ha_state()
