@@ -50,21 +50,21 @@ class AZRouterIntegrationSwitch(AZRouterIntegrationEntity, SwitchEntity):
         )
         self._spec = spec
 
-    @property
-    def is_on(self) -> bool:
-        """Return true if the switch is on."""
-        return bool(self._spec.accessor.extract(self.coordinator.data))
+    def _handle_coordinator_update(self) -> None:
+        """Sync _attr_is_on from fresh coordinator data, then notify HA."""
+        self._attr_is_on = bool(self._spec.reader.extract(self.coordinator.data))
+        super()._handle_coordinator_update()
 
     async def async_turn_on(self, **_: Any) -> None:
         """Turn on the switch."""
-        client = self.coordinator.config_entry.runtime_data.client
-        await self._spec.request.async_execute(client, value=True)
-        self._spec.accessor.set(self.coordinator.data, 1)
-        self.async_write_ha_state()
+        await self._async_set_value(True)
 
     async def async_turn_off(self, **_: Any) -> None:
         """Turn off the switch."""
+        await self._async_set_value(False)
+
+    async def _async_set_value(self, value: bool) -> None:
         client = self.coordinator.config_entry.runtime_data.client
-        await self._spec.request.async_execute(client, value=False)
-        self._spec.accessor.set(self.coordinator.data, 0)
+        await self._spec.writer.async_execute(client, value)
+        self._attr_is_on = value
         self.async_write_ha_state()
