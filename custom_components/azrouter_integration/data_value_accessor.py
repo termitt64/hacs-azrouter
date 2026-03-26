@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import copy
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -16,23 +16,39 @@ class DataValueAccessor:
     Path is a dot-separated string, e.g. "devices.0.charge.boost".
     """
 
+    class _ExtractionStrategy(ABC):
+        @abstractmethod
+        def extract(self, data: Any, key: str) -> Any:
+            """Extract the value for key from data."""
+
+    class _ListExtractionStrategy(_ExtractionStrategy):
+        def extract(self, data: Any, key: str) -> Any:
+            try:
+                return data[int(key)]
+            except (ValueError, IndexError):
+                return None
+
+    class _DictExtractionStrategy(_ExtractionStrategy):
+        def extract(self, data: Any, key: str) -> Any:
+            return data.get(key)
+
+    _LIST_STRATEGY = _ListExtractionStrategy()
+    _DICT_STRATEGY = _DictExtractionStrategy()
+
     def __init__(self, path: str) -> None:
         """Initialize with a dot-separated path."""
         parts = path.split(".", 1)
         self._key = parts[0]
-        self._proxy: DataValueAccessor | None = (
-            DataValueAccessor(parts[1]) if len(parts) > 1 else None
+        self._proxy: DataValueAccessor | DataValueWriter | None = (
+            type(self)(parts[1]) if len(parts) > 1 else None
         )
 
     def extract(self, data: Mapping[str, Any] | list[Any]) -> Any:
         """Retrieve value from given data (dict or list)."""
-        if isinstance(data, list):
-            try:
-                value = data[int(self._key)]
-            except (ValueError, IndexError):
-                return None
-        else:
-            value = data.get(self._key)
+        strategy = (
+            self._LIST_STRATEGY if isinstance(data, list) else self._DICT_STRATEGY
+        )
+        value = strategy.extract(data, self._key)
         return (
             self._proxy.extract(value) if value is not None and self._proxy else value
         )
@@ -46,43 +62,43 @@ class DataValueWriter(DataValueAccessor):
     an optimistic update after a successful API write.
     """
 
-    def set(self, data: dict | list, value: Any) -> None:
-        """Set value in given data (dict or list) at this path."""
-        if isinstance(data, list):
-            idx = int(self._key)
-            if self._proxy is None:
-                data[idx] = value
-            else:
-                self._proxy.set(data[idx], value)
-        elif self._proxy is None:
-            data[self._key] = value
+    class _InjectionStrategy(ABC):
+        @abstractmethod
+        def inject(self, data: Any, key: str, value: Any) -> None:
+            """Set value directly in data at key (leaf operation)."""
+
+        @abstractmethod
+        def traverse(self, data: Any, key: str) -> Any:
+            """Return the child node at key, creating it if necessary."""
+
+    class _ListInjectionStrategy(_InjectionStrategy):
+        def inject(self, data: Any, key: str, value: Any) -> None:
+            data[int(key)] = value
+
+        def traverse(self, data: Any, key: str) -> Any:
+            return data[int(key)]
+
+    class _DictInjectionStrategy(_InjectionStrategy):
+        def inject(self, data: Any, key: str, value: Any) -> None:
+            data[key] = value
+
+        def traverse(self, data: Any, key: str) -> Any:
+            if key not in data:
+                data[key] = {}
+            return data[key]
+
+    _LIST_INJECT_STRATEGY = _ListInjectionStrategy()
+    _DICT_INJECT_STRATEGY = _DictInjectionStrategy()
+
+    def inject(self, data: dict | list, value: Any) -> None:
+        """Write value into data (dict or list) at this path."""
+        strategy = (
+            self._LIST_INJECT_STRATEGY
+            if isinstance(data, list)
+            else self._DICT_INJECT_STRATEGY
+        )
+        proxy = self._proxy if isinstance(self._proxy, DataValueWriter) else None
+        if proxy is not None:
+            proxy.inject(strategy.traverse(data, self._key), value)
         else:
-            if self._key not in data:
-                data[self._key] = {}
-            self._proxy.set(data[self._key], value)
-
-
-class ApiRequestComposer:
-    """
-    Composes and executes an API POST request.
-
-    Builds the JSON payload by deep-copying an optional base dict and then
-    writing the target value at payload_path using a DataValueWriter.
-    """
-
-    def __init__(
-        self,
-        resource: str,
-        payload_path: str,
-        payload_base: dict | None = None,
-    ) -> None:
-        """Initialize with the API resource, payload path, and optional base dict."""
-        self._resource = resource
-        self._payload_writer = DataValueWriter(payload_path)
-        self._payload_base: dict = payload_base or {}
-
-    async def async_execute(self, client: Any, *, value: bool) -> None:
-        """Build payload and POST to the API resource."""
-        payload = copy.deepcopy(self._payload_base)
-        self._payload_writer.set(payload, int(value))
-        await client.async_post(self._resource, payload)
+            strategy.inject(data, self._key, value)
