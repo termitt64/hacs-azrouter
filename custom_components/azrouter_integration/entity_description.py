@@ -23,7 +23,7 @@ from homeassistant.const import (
 )
 
 from .api_request_composer import ApiRequestComposer, BoolToNumConverter
-from .data_value_accessor import DataValueAccessor, DataValueWriter
+from .data_value_accessor import DataValueAccessor
 from .device import AZCharger, AZDeviceBase, AZDeviceFactory, AZRouter
 
 if TYPE_CHECKING:
@@ -268,7 +268,11 @@ class EntityDescriptionFactory:
     def _build_providers(
         device_list: list[AZDeviceBase],
     ) -> list[_DeviceDescriptionProvider]:
-        """Map each device to its description provider, tracking charger index for array paths."""
+        """
+        Map each device to its description provider.
+
+        Tracking charger index for array paths.
+        """
         providers: list[_DeviceDescriptionProvider] = []
         charger_index = 0
         for device in device_list:

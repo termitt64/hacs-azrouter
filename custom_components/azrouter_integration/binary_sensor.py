@@ -33,7 +33,7 @@ async def async_setup_entry(
 
 
 class AZRouterIntegrationBinarySensor(AZRouterIntegrationEntity, BinarySensorEntity):
-    """Binary sensor entity for an AZRouter boolean data point read from coordinator data."""
+    """Binary sensor entity for an AZRouter boolean data."""
 
     _attr_has_entity_name = True
 

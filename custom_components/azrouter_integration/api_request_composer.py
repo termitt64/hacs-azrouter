@@ -16,18 +16,18 @@ class ValueConverter:
         """Convert value to the API-expected type."""
 
 
-class TypedConverter[_FromType, _ToType](ValueConverter):
+class TypedConverter[FromType, ToType](ValueConverter):
     """Generic typed converter with explicit input and output types."""
 
     @abstractmethod
-    def convert(self, value: _FromType) -> _ToType:
+    def convert(self, value: FromType) -> ToType:
         """Convert a value of _FromType to _ToType."""
 
 
 class BoolToNumConverter(TypedConverter[bool, int]):
     """Converts a Python bool to an integer (True→1, False→0)."""
 
-    def convert(self, value: bool) -> int:
+    def convert(self, value: bool) -> int:  # noqa: FBT001
         """Return 1 for True, 0 for False."""
         return 1 if value else 0
 
@@ -54,7 +54,11 @@ class ApiRequestComposer:
         self._payload_base: dict = payload_base or {}
 
     def prepare_payload(self, value: Any) -> dict:
-        """Build the JSON payload by injecting the converted value into a copy of the base dict."""
+        """
+        Build the JSON payload.
+
+        By injecting the converted value into a copy of the base dict.
+        """
         payload = copy.deepcopy(self._payload_base)
         self._payload_writer.inject(
             payload, self._converter.convert(value) if self._converter else value
