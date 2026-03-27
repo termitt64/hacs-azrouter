@@ -54,5 +54,4 @@ class AZRouterDataUpdateCoordinator(DataUpdateCoordinator):
         except AZRouterIntegrationApiClientError as exception:
             raise UpdateFailed(exception) from exception
         else:
-            LOGGER.debug("Got AZRouter data:\n%s", json.dumps(data))
             return data
