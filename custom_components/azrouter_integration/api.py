@@ -57,7 +57,6 @@ def _verify_response_or_raise(response: aiohttp.ClientResponse) -> None:
         raise AZRouterIntegrationApiClientAuthenticationError(
             msg,
         )
-    LOGGER.debug("Got response: %s", response.text)
     response.raise_for_status()
 
 
@@ -149,7 +148,6 @@ class AZRouterIntegrationApiClient:
         """Execute an HTTP request, raising typed exceptions on error."""
         try:
             async with async_timeout.timeout(10):
-                LOGGER.debug("Request %s [%s]: %s", method, headers, data)
                 response = await self._session.request(
                     method=method,
                     url=url,
