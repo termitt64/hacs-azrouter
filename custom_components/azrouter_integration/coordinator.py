@@ -31,12 +31,12 @@ class AZRouterDataUpdateCoordinator(DataUpdateCoordinator):
         self,
         hass: HomeAssistant,
     ) -> None:
-        """Initialize the coordinator with a 1-hour polling interval."""
+        """Initialize the coordinator with a 30-second polling interval."""
         super().__init__(
             hass=hass,
             logger=LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(hours=1),
+            update_interval=timedelta(seconds=30),
         )
 
     async def _async_update_data(self) -> Any:
