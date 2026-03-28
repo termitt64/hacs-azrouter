@@ -52,7 +52,9 @@ class AZRouterIntegrationSwitch(AZRouterIntegrationEntity, SwitchEntity):
 
     def _handle_coordinator_update(self) -> None:
         """Sync _attr_is_on from fresh coordinator data, then notify HA."""
-        self._attr_is_on = bool(self._spec.reader.extract(self.coordinator.data))
+        value = self._spec.reader.extract(self.coordinator.data)
+        if value is not None:
+            self._attr_is_on = bool(value)
         super()._handle_coordinator_update()
 
     async def async_turn_on(self, **_: Any) -> None:
