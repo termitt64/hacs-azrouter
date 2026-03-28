@@ -9,8 +9,6 @@ from urllib.parse import urljoin
 import aiohttp
 import async_timeout
 
-from .const import LOGGER
-
 API_URL: Final = "/api/v1/"
 
 
