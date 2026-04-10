@@ -66,6 +66,19 @@ class SwitchSpec:
     device_info: DeviceInfo
 
 
+@dataclass
+class _PhaseSensorDef:
+    """Parameters for building a set of per-phase sensor specs."""
+
+    key_prefix: str
+    name_prefix: str
+    icon: str
+    device_class: SensorDeviceClass
+    native_unit: str
+    suggested_unit: str
+    path_prefix: str
+
+
 # ── Per-device-type description providers ─────────────────────────────────────
 
 
@@ -141,7 +154,7 @@ class _RouterDescriptions(_DeviceDescriptionProvider):
                 path="cloud/status.status",
                 device_info=self._di,
             ),
-            *self._phase_sensor_specs(
+            *self._phase_sensor_specs(_PhaseSensorDef(
                 key_prefix="input_power",
                 name_prefix="Input Power",
                 icon="mdi:transmission-tower",
@@ -149,8 +162,8 @@ class _RouterDescriptions(_DeviceDescriptionProvider):
                 native_unit=UnitOfPower.WATT,
                 suggested_unit=UnitOfPower.WATT,
                 path_prefix="power.input.power",
-            ),
-            *self._phase_sensor_specs(
+            )),
+            *self._phase_sensor_specs(_PhaseSensorDef(
                 key_prefix="input_voltage",
                 name_prefix="Input Voltage",
                 icon="mdi:sine-wave",
@@ -158,8 +171,8 @@ class _RouterDescriptions(_DeviceDescriptionProvider):
                 native_unit=UnitOfElectricPotential.MILLIVOLT,
                 suggested_unit=UnitOfElectricPotential.VOLT,
                 path_prefix="power.input.voltage",
-            ),
-            *self._phase_sensor_specs(
+            )),
+            *self._phase_sensor_specs(_PhaseSensorDef(
                 key_prefix="input_current",
                 name_prefix="Input Current",
                 icon="mdi:current-ac",
@@ -167,8 +180,8 @@ class _RouterDescriptions(_DeviceDescriptionProvider):
                 native_unit=UnitOfElectricCurrent.MILLIAMPERE,
                 suggested_unit=UnitOfElectricCurrent.AMPERE,
                 path_prefix="power.input.current",
-            ),
-            *self._phase_sensor_specs(
+            )),
+            *self._phase_sensor_specs(_PhaseSensorDef(
                 key_prefix="output_power",
                 name_prefix="Output Power",
                 icon="mdi:transmission-tower-export",
@@ -176,7 +189,7 @@ class _RouterDescriptions(_DeviceDescriptionProvider):
                 native_unit=UnitOfPower.WATT,
                 suggested_unit=UnitOfPower.WATT,
                 path_prefix="power.output.power",
-            ),
+            )),
             *[
                 SensorSpec(
                     description=SensorEntityDescription(
@@ -239,30 +252,20 @@ class _RouterDescriptions(_DeviceDescriptionProvider):
             ),
         ]
 
-    def _phase_sensor_specs(
-        self,
-        *,
-        key_prefix: str,
-        name_prefix: str,
-        icon: str,
-        device_class: SensorDeviceClass,
-        native_unit: str,
-        suggested_unit: str,
-        path_prefix: str,
-    ) -> list[SensorSpec]:
+    def _phase_sensor_specs(self, defn: _PhaseSensorDef) -> list[SensorSpec]:
         """Build three per-phase sensor specs (L1, L2, L3)."""
         return [
             SensorSpec(
                 description=SensorEntityDescription(
-                    key=f"{key_prefix}_l{phase}",
-                    name=f"{name_prefix} L{phase}",
-                    icon=icon,
-                    device_class=device_class,
-                    native_unit_of_measurement=native_unit,
-                    suggested_unit_of_measurement=suggested_unit,
+                    key=f"{defn.key_prefix}_l{phase}",
+                    name=f"{defn.name_prefix} L{phase}",
+                    icon=defn.icon,
+                    device_class=defn.device_class,
+                    native_unit_of_measurement=defn.native_unit,
+                    suggested_unit_of_measurement=defn.suggested_unit,
                     state_class=SensorStateClass.MEASUREMENT,
                 ),
-                path=f"{path_prefix}.{phase - 1}.value",
+                path=f"{defn.path_prefix}.{phase - 1}.value",
                 device_info=self._di,
             )
             for phase in (1, 2, 3)
