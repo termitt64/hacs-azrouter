@@ -36,10 +36,7 @@ class _ResourceSchedule:
 
     def is_due(self, now: datetime) -> bool:
         """Return True if never fetched or if the refresh interval has elapsed."""
-        return (
-            self.last_fetched is None
-            or now - self.last_fetched >= self.interval
-        )
+        return self.last_fetched is None or now - self.last_fetched >= self.interval
 
     async def refresh(self, now: datetime) -> None:
         """Fetch and cache a fresh value, recording the fetch time."""
