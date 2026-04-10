@@ -17,6 +17,8 @@ from homeassistant.components.sensor import (
 from homeassistant.components.switch import SwitchEntityDescription
 from homeassistant.const import (
     SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
+    UnitOfElectricCurrent,
+    UnitOfElectricPotential,
     UnitOfPower,
     UnitOfTemperature,
     UnitOfTime,
@@ -129,6 +131,42 @@ class _RouterDescriptions(_DeviceDescriptionProvider):
                 path="status.activeDevice.maxPower",
                 device_info=self._di,
             ),
+            SensorSpec(
+                description=SensorEntityDescription(
+                    key="cloud_status",
+                    name="Cloud Status",
+                    icon="mdi:cloud-check-outline",
+                ),
+                path="cloud/status.status",
+                device_info=self._di,
+            ),
+            *self._phase_sensor_specs(
+                key_prefix="input_power",
+                name_prefix="Input Power",
+                icon="mdi:transmission-tower",
+                device_class=SensorDeviceClass.POWER,
+                native_unit=UnitOfPower.WATT,
+                suggested_unit=UnitOfPower.WATT,
+                path_prefix="power.input.power",
+            ),
+            *self._phase_sensor_specs(
+                key_prefix="input_voltage",
+                name_prefix="Input Voltage",
+                icon="mdi:sine-wave",
+                device_class=SensorDeviceClass.VOLTAGE,
+                native_unit=UnitOfElectricPotential.MILLIVOLT,
+                suggested_unit=UnitOfElectricPotential.VOLT,
+                path_prefix="power.input.voltage",
+            ),
+            *self._phase_sensor_specs(
+                key_prefix="input_current",
+                name_prefix="Input Current",
+                icon="mdi:current-ac",
+                device_class=SensorDeviceClass.CURRENT,
+                native_unit=UnitOfElectricCurrent.MILLIAMPERE,
+                suggested_unit=UnitOfElectricCurrent.AMPERE,
+                path_prefix="power.input.current",
+            ),
         ]
 
     def binary_sensor_specs(self) -> list[BinarySensorSpec]:
@@ -152,6 +190,35 @@ class _RouterDescriptions(_DeviceDescriptionProvider):
                 path="status.system.hdo",
                 device_info=self._di,
             ),
+        ]
+
+    def _phase_sensor_specs(
+        self,
+        *,
+        key_prefix: str,
+        name_prefix: str,
+        icon: str,
+        device_class: SensorDeviceClass,
+        native_unit: str,
+        suggested_unit: str,
+        path_prefix: str,
+    ) -> list[SensorSpec]:
+        """Build three per-phase sensor specs (L1, L2, L3)."""
+        return [
+            SensorSpec(
+                description=SensorEntityDescription(
+                    key=f"{key_prefix}_l{phase}",
+                    name=f"{name_prefix} L{phase}",
+                    icon=icon,
+                    device_class=device_class,
+                    native_unit_of_measurement=native_unit,
+                    suggested_unit_of_measurement=suggested_unit,
+                    state_class=SensorStateClass.MEASUREMENT,
+                ),
+                path=f"{path_prefix}.{phase - 1}.value",
+                device_info=self._di,
+            )
+            for phase in (1, 2, 3)
         ]
 
     def switch_specs(self) -> list[SwitchSpec]:
@@ -221,6 +288,34 @@ class _ChargerDescriptions(_DeviceDescriptionProvider):
                 path=f"devices.{i}.charge.boostSource",
                 device_info=self._di,
             ),
+            SensorSpec(
+                description=SensorEntityDescription(
+                    key=f"charger_{i}_temperature",
+                    name="Temperature",
+                    icon="mdi:thermometer",
+                    device_class=SensorDeviceClass.TEMPERATURE,
+                    native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+                    state_class=SensorStateClass.MEASUREMENT,
+                ),
+                path=f"devices.{i}.charge.temperature",
+                device_info=self._di,
+            ),
+            *[
+                SensorSpec(
+                    description=SensorEntityDescription(
+                        key=f"charger_{i}_current_l{phase}",
+                        name=f"Current L{phase}",
+                        icon="mdi:current-ac",
+                        device_class=SensorDeviceClass.CURRENT,
+                        native_unit_of_measurement=UnitOfElectricCurrent.MILLIAMPERE,
+                        suggested_unit_of_measurement=UnitOfElectricCurrent.AMPERE,
+                        state_class=SensorStateClass.MEASUREMENT,
+                    ),
+                    path=f"devices.{i}.charge.current.{phase - 1}",
+                    device_info=self._di,
+                )
+                for phase in (1, 2, 3)
+            ],
         ]
 
     def switch_specs(self) -> list[SwitchSpec]:
