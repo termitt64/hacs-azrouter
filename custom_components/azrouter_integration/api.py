@@ -159,17 +159,17 @@ class AZRouterIntegrationApiClient:
                 return response
 
         except TimeoutError as exception:
-            msg = f"Timeout error fetching information - {exception}"
+            msg = f"Timeout error fetching {method.upper()} {url} - {exception}"
             raise AZRouterIntegrationApiClientCommunicationError(
                 msg,
             ) from exception
         except (aiohttp.ClientError, socket.gaierror) as exception:
-            msg = f"Error fetching information - {exception}"
+            msg = f"Error fetching {method.upper()} {url} - {exception}"
             raise AZRouterIntegrationApiClientCommunicationError(
                 msg,
             ) from exception
         except Exception as exception:  # pylint: disable=broad-except
-            msg = f"Something really wrong happened! - {exception}"
+            msg = f"Unexpected error fetching {method.upper()} {url} - {exception}"
             raise AZRouterIntegrationApiClientError(
                 msg,
             ) from exception
