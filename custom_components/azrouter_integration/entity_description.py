@@ -19,6 +19,7 @@ from homeassistant.const import (
     SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
     UnitOfElectricCurrent,
     UnitOfElectricPotential,
+    UnitOfEnergy,
     UnitOfPower,
     UnitOfTemperature,
     UnitOfTime,
@@ -175,6 +176,34 @@ class _RouterDescriptions(_DeviceDescriptionProvider):
                 native_unit=UnitOfPower.WATT,
                 suggested_unit=UnitOfPower.WATT,
                 path_prefix="power.output.power",
+            ),
+            *[
+                SensorSpec(
+                    description=SensorEntityDescription(
+                        key=f"output_energy_{ch}",
+                        name=f"Output Energy {ch}",
+                        icon="mdi:counter",
+                        device_class=SensorDeviceClass.ENERGY,
+                        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
+                        suggested_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+                        state_class=SensorStateClass.TOTAL_INCREASING,
+                    ),
+                    path=f"power.output.energy.{ch}.value",
+                    device_info=self._di,
+                )
+                for ch in range(4)
+            ],
+            SensorSpec(
+                description=SensorEntityDescription(
+                    key="regulation_target_power",
+                    name="Regulation Target Power",
+                    icon="mdi:target",
+                    device_class=SensorDeviceClass.POWER,
+                    native_unit_of_measurement=UnitOfPower.WATT,
+                    state_class=SensorStateClass.MEASUREMENT,
+                ),
+                path="settings.regulation.target_power_w",
+                device_info=self._di,
             ),
         ]
 

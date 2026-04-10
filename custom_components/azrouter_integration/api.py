@@ -28,6 +28,9 @@ class AZRouterApiClientProtocol(Protocol):
     async def async_get_devices(self) -> Any:
         """Get devices."""
 
+    async def async_get_settings(self) -> Any:
+        """Get settings."""
+
     async def async_post(self, resource: str, data: dict) -> Any:
         """Post data to a resource."""
 

@@ -47,6 +47,7 @@ class AZRouterDataUpdateCoordinator(DataUpdateCoordinator):
                 "status": await client.async_get_status(),
                 "power": await client.async_get_power(),
                 "devices": await client.async_get_devices(),
+                "settings": await client.async_get_settings(),
             }
         except AZRouterIntegrationApiClientAuthenticationError as exception:
             raise ConfigEntryAuthFailed(exception) from exception
