@@ -167,6 +167,15 @@ class _RouterDescriptions(_DeviceDescriptionProvider):
                 suggested_unit=UnitOfElectricCurrent.AMPERE,
                 path_prefix="power.input.current",
             ),
+            *self._phase_sensor_specs(
+                key_prefix="output_power",
+                name_prefix="Output Power",
+                icon="mdi:transmission-tower-export",
+                device_class=SensorDeviceClass.POWER,
+                native_unit=UnitOfPower.WATT,
+                suggested_unit=UnitOfPower.WATT,
+                path_prefix="power.output.power",
+            ),
         ]
 
     def binary_sensor_specs(self) -> list[BinarySensorSpec]:
@@ -188,6 +197,15 @@ class _RouterDescriptions(_DeviceDescriptionProvider):
                     icon="mdi:transmission-tower",
                 ),
                 path="status.system.hdo",
+                device_info=self._di,
+            ),
+            BinarySensorSpec(
+                description=BinarySensorEntityDescription(
+                    key="cloud_registered",
+                    name="Cloud Registered",
+                    icon="mdi:cloud-check",
+                ),
+                path="status.cloud.registered",
                 device_info=self._di,
             ),
         ]
@@ -290,6 +308,16 @@ class _ChargerDescriptions(_DeviceDescriptionProvider):
             ),
             SensorSpec(
                 description=SensorEntityDescription(
+                    key=f"charger_{i}_charge_status",
+                    name="Charge Status",
+                    icon="mdi:ev-plug-type2",
+                    state_class=SensorStateClass.MEASUREMENT,
+                ),
+                path=f"devices.{i}.charge.status",
+                device_info=self._di,
+            ),
+            SensorSpec(
+                description=SensorEntityDescription(
                     key=f"charger_{i}_temperature",
                     name="Temperature",
                     icon="mdi:thermometer",
@@ -316,6 +344,21 @@ class _ChargerDescriptions(_DeviceDescriptionProvider):
                 )
                 for phase in (1, 2, 3)
             ],
+        ]
+
+    def binary_sensor_specs(self) -> list[BinarySensorSpec]:
+        """Return charger binary sensor specs."""
+        i = self._i
+        return [
+            BinarySensorSpec(
+                description=BinarySensorEntityDescription(
+                    key=f"charger_{i}_connected",
+                    name="Connected",
+                    device_class=BinarySensorDeviceClass.CONNECTIVITY,
+                ),
+                path=f"devices.{i}.common.status",
+                device_info=self._di,
+            ),
         ]
 
     def switch_specs(self) -> list[SwitchSpec]:
