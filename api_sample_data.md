@@ -1,8 +1,11 @@
 # AZRouter API — Sample Data
 
+Router: `http://192.168.21.98/` · user: `admin`  
 Captured from `LOGGER.debug("Coordinator data: %s", data)` on 2026-04-10.
 
-## `cloud/status`
+---
+
+## `GET /api/v1/cloud/status`
 
 ```json
 {
@@ -11,7 +14,14 @@ Captured from `LOGGER.debug("Coordinator data: %s", data)` on 2026-04-10.
 }
 ```
 
-## `status`
+| Field | Type | Meaning |
+|---|---|---|
+| `status` | string | Cloud reachability: `"online"` / (presumably `"offline"`) |
+| `url` | string | Cloud dashboard URL for this specific router (suffix = MAC address) |
+
+---
+
+## `GET /api/v1/status`
 
 ```json
 {
@@ -42,7 +52,42 @@ Captured from `LOGGER.debug("Coordinator data: %s", data)` on 2026-04-10.
 }
 ```
 
-## `power`
+### `status.system`
+
+| Field | Type | Meaning |
+|---|---|---|
+| `status` | int | Router operational status: `0` = OK |
+| `hdo` | int | HDO (ripple control) signal state: `1` = active, `0` = inactive |
+| `mode` | int | Operating mode: `0` = normal (TBD: other values) |
+| `temperature` | int | Router board temperature in °C |
+| `time` | int | Current Unix timestamp on the router |
+| `masterBoost` | int | Master boost enabled: `1` = on, `0` = off |
+| `uptime` | int | System uptime in milliseconds |
+| `hw` | int | Hardware revision (e.g. `202`) |
+| `sn` | string | Serial number (`"N/A"` if not set) |
+| `mac` | string | Router MAC address (also used as unique identifier) |
+| `fw` | string | Firmware version string |
+| `www` | string | Web UI firmware version string |
+
+### `status.cloud`
+
+| Field | Type | Meaning |
+|---|---|---|
+| `status` | int | Cloud connection state: `4` = fully connected and registered |
+| `reachable` | int | Cloud server reachable: `1` = yes, `0` = no |
+| `registered` | int | Router registered with cloud: `1` = yes, `0` = no |
+
+### `status.activeDevice`
+
+| Field | Type | Meaning |
+|---|---|---|
+| `id` | int | ID of the currently active/controlling device |
+| `maxPower` | int | Maximum power of the active device in W |
+| `name` | string | Human-readable name of the active device |
+
+---
+
+## `GET /api/v1/power`
 
 ```json
 {
@@ -91,14 +136,29 @@ Captured from `LOGGER.debug("Coordinator data: %s", data)` on 2026-04-10.
 }
 ```
 
-Notes:
-- `input.power` values are in **W**, negative = export to grid (ids 0–2 = L1–L3, id 3 = always 0)
-- `input.voltage` values are in **mV** (÷1000 → V)
-- `input.current` values are in **mA** (÷1000 → A), negative = export
-- `output.power` — per-output W (ids 0–3, meaning TBD)
-- `output.energy` — per-output energy (unit TBD, ids 0–4)
+### `power.input` — grid/meter measurements (ids 0–2 = L1–L3, id 3 = unused/total)
 
-## `devices`
+| Field | Unit | Notes |
+|---|---|---|
+| `power[n].value` | W | Positive = consuming from grid, negative = exporting to grid |
+| `voltage[n].value` | mV | Divide by 1000 for V (e.g. `240620` → 240.62 V) |
+| `current[n].value` | mA | Divide by 1000 for A; negative = export direction |
+| `status[n].value` | int | Meter status per phase: `0` = OK |
+
+### `power.output` — per-output channel measurements
+
+| Field | Unit | Notes |
+|---|---|---|
+| `power[n].value` | W | Per-output power (id 0–2 = likely L1–L3, id 3 = total: 460+575+345 ≈ 1380 ✓) |
+| `energy[n].value` | Wh (TBD) | Cumulative energy per output (5 channels, meaning TBD) |
+
+| Field | Type | Meaning |
+|---|---|---|
+| `lastUpdate` | int | Unix timestamp of the last meter reading |
+
+---
+
+## `GET /api/v1/devices`
 
 ```json
 [
@@ -125,14 +185,35 @@ Notes:
       "circuitBreaker": 32,
       "triggerPhase": 0,
       "totalPower": 1442
-    },
-    "settings": ["...omitted for brevity..."]
+    }
   }
 ]
 ```
 
-Notes:
-- `charge.current` is a plain array (not id/value objects): `[L1_mA, L2_mA, L3_mA]`
-- `charge.temperature` in °C
-- `charge.status`: 2 = charging (enum TBD)
-- `charge.circuitBreaker`: max current in A
+### `devices[n].common`
+
+| Field | Type | Meaning |
+|---|---|---|
+| `priority` | int | Scheduling priority among multiple chargers |
+| `id` | int | Unique device ID (used in API write calls) |
+| `name` | string | Human-readable charger name |
+| `status` | int | Device connection status: `4` = online/connected |
+| `signal` | int | WiFi RSSI in dBm (e.g. `-51` = good signal) |
+| `type` | int | Device type code: `4` = AZ Charger (mirrors `deviceType`) |
+| `sn` | string | Serial number (`"N/A"` if not set) |
+| `fw` | string | Charger firmware version |
+| `hw` | int | Hardware revision |
+
+### `devices[n].charge`
+
+| Field | Type | Meaning |
+|---|---|---|
+| `status` | int | Charger status: `2` = actively charging |
+| `state` | int | Charge state: `0` = normal (TBD: fault codes) |
+| `current` | int[3] | Per-phase charging current in mA: `[L1, L2, L3]` |
+| `temperature` | int | Charger board temperature in °C |
+| `boost` | int | Boost active: `1` = on, `0` = off |
+| `boostSource` | int | Source triggering boost: `0` = none (TBD: other values) |
+| `circuitBreaker` | int | Max allowed current from circuit breaker in A (here: 32 A) |
+| `triggerPhase` | int | Phase that triggered charging decision: `0` = none/all |
+| `totalPower` | int | Total charging power in W across all phases |
