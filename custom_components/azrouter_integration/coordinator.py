@@ -65,6 +65,10 @@ def _build_schedules(
             fetch=client.async_get_devices,
             interval=timedelta(seconds=1),
         ),
+        "settings": _ResourceSchedule(
+            fetch=client.async_get_settings,
+            interval=timedelta(seconds=60),
+        ),
     }
 
 
