@@ -154,42 +154,50 @@ class _RouterDescriptions(_DeviceDescriptionProvider):
                 path="cloud/status.status",
                 device_info=self._di,
             ),
-            *self._phase_sensor_specs(_PhaseSensorDef(
-                key_prefix="input_power",
-                name_prefix="Input Power",
-                icon="mdi:transmission-tower",
-                device_class=SensorDeviceClass.POWER,
-                native_unit=UnitOfPower.WATT,
-                suggested_unit=UnitOfPower.WATT,
-                path_prefix="power.input.power",
-            )),
-            *self._phase_sensor_specs(_PhaseSensorDef(
-                key_prefix="input_voltage",
-                name_prefix="Input Voltage",
-                icon="mdi:sine-wave",
-                device_class=SensorDeviceClass.VOLTAGE,
-                native_unit=UnitOfElectricPotential.MILLIVOLT,
-                suggested_unit=UnitOfElectricPotential.VOLT,
-                path_prefix="power.input.voltage",
-            )),
-            *self._phase_sensor_specs(_PhaseSensorDef(
-                key_prefix="input_current",
-                name_prefix="Input Current",
-                icon="mdi:current-ac",
-                device_class=SensorDeviceClass.CURRENT,
-                native_unit=UnitOfElectricCurrent.MILLIAMPERE,
-                suggested_unit=UnitOfElectricCurrent.AMPERE,
-                path_prefix="power.input.current",
-            )),
-            *self._phase_sensor_specs(_PhaseSensorDef(
-                key_prefix="output_power",
-                name_prefix="Output Power",
-                icon="mdi:transmission-tower-export",
-                device_class=SensorDeviceClass.POWER,
-                native_unit=UnitOfPower.WATT,
-                suggested_unit=UnitOfPower.WATT,
-                path_prefix="power.output.power",
-            )),
+            *self._phase_sensor_specs(
+                _PhaseSensorDef(
+                    key_prefix="input_power",
+                    name_prefix="Input Power",
+                    icon="mdi:transmission-tower",
+                    device_class=SensorDeviceClass.POWER,
+                    native_unit=UnitOfPower.WATT,
+                    suggested_unit=UnitOfPower.WATT,
+                    path_prefix="power.input.power",
+                )
+            ),
+            *self._phase_sensor_specs(
+                _PhaseSensorDef(
+                    key_prefix="input_voltage",
+                    name_prefix="Input Voltage",
+                    icon="mdi:sine-wave",
+                    device_class=SensorDeviceClass.VOLTAGE,
+                    native_unit=UnitOfElectricPotential.MILLIVOLT,
+                    suggested_unit=UnitOfElectricPotential.VOLT,
+                    path_prefix="power.input.voltage",
+                )
+            ),
+            *self._phase_sensor_specs(
+                _PhaseSensorDef(
+                    key_prefix="input_current",
+                    name_prefix="Input Current",
+                    icon="mdi:current-ac",
+                    device_class=SensorDeviceClass.CURRENT,
+                    native_unit=UnitOfElectricCurrent.MILLIAMPERE,
+                    suggested_unit=UnitOfElectricCurrent.AMPERE,
+                    path_prefix="power.input.current",
+                )
+            ),
+            *self._phase_sensor_specs(
+                _PhaseSensorDef(
+                    key_prefix="output_power",
+                    name_prefix="Output Power",
+                    icon="mdi:transmission-tower-export",
+                    device_class=SensorDeviceClass.POWER,
+                    native_unit=UnitOfPower.WATT,
+                    suggested_unit=UnitOfPower.WATT,
+                    path_prefix="power.output.power",
+                )
+            ),
             *[
                 SensorSpec(
                     description=SensorEntityDescription(
