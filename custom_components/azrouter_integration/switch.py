@@ -49,12 +49,17 @@ class AZRouterIntegrationSwitch(AZRouterIntegrationEntity, SwitchEntity):
             f"{coordinator.config_entry.entry_id}_{spec.description.key}"
         )
         self._spec = spec
+        self._sync_state(coordinator.data)
+
+    def _sync_state(self, data: Any) -> None:
+        """Read the switch value from coordinator data and update _attr_is_on."""
+        value = self._spec.reader.extract(data)
+        if value is not None:
+            self._attr_is_on = bool(value)
 
     def _handle_coordinator_update(self) -> None:
         """Sync _attr_is_on from fresh coordinator data, then notify HA."""
-        value = self._spec.reader.extract(self.coordinator.data)
-        if value is not None:
-            self._attr_is_on = bool(value)
+        self._sync_state(self.coordinator.data)
         super()._handle_coordinator_update()
 
     async def async_turn_on(self, **_: Any) -> None:

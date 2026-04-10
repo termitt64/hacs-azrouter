@@ -42,16 +42,15 @@ async def async_setup_entry(
     entry: AZRouterIntegrationConfigEntry,
 ) -> bool:
     """Set up this integration using UI."""
-    coordinator = AZRouterDataUpdateCoordinator(
-        hass=hass,
+    client = AZRouterIntegrationApiClient(
+        base_url=entry.data[CONF_URL],
+        username=entry.data[CONF_USERNAME],
+        password=entry.data[CONF_PASSWORD],
+        session=async_get_clientsession(hass),
     )
+    coordinator = AZRouterDataUpdateCoordinator(hass=hass, client=client)
     entry.runtime_data = AZRouterIntegrationData(
-        client=AZRouterIntegrationApiClient(
-            base_url=entry.data[CONF_URL],
-            username=entry.data[CONF_USERNAME],
-            password=entry.data[CONF_PASSWORD],
-            session=async_get_clientsession(hass),
-        ),
+        client=client,
         integration=async_get_loaded_integration(hass, entry.domain),
         coordinator=coordinator,
     )
