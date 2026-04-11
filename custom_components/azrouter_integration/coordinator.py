@@ -41,7 +41,10 @@ class _ResourceSchedule:
     async def refresh(self, now: datetime) -> None:
         """Fetch and cache a fresh value, recording the fetch time."""
         self.cached = await self.fetch()
-        self.last_fetched = now
+        # Floor to whole second so that HA's int(loop.time())-based scheduler
+        # always fires at least 1 s after last_fetched, preventing every other
+        # poll from being skipped when a fetch lands mid-second (f > μ offset).
+        self.last_fetched = now.replace(microsecond=0)
 
 
 def _build_schedules(
