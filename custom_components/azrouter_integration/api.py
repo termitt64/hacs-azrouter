@@ -146,15 +146,29 @@ class AZRouterIntegrationApiClient:
         data: dict | None = None,
         headers: dict | None = None,
     ) -> Any:
-        """Execute an HTTP request, raising typed exceptions on error."""
+        """
+        Execute an HTTP request, raising typed exceptions on error.
+
+        Retries once on ServerDisconnectedError before giving up.
+        """
         try:
             async with async_timeout.timeout(10):
-                response = await self._session.request(
-                    method=method,
-                    url=url,
-                    headers=headers,
-                    json=data,
-                )
+                try:
+                    response = await self._session.request(
+                        method=method,
+                        url=url,
+                        headers=headers,
+                        json=data,
+                    )
+                except aiohttp.ServerDisconnectedError:
+                    # Router dropped the connection; retry once immediately.
+                    # Any error on the retry propagates to the outer handler.
+                    response = await self._session.request(
+                        method=method,
+                        url=url,
+                        headers=headers,
+                        json=data,
+                    )
                 _verify_response_or_raise(response)
                 return response
 
