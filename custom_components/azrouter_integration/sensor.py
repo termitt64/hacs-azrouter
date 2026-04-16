@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
     from .coordinator import AZRouterDataUpdateCoordinator
     from .data import AZRouterIntegrationConfigEntry
+    from .entity_description import RawValueInterpreter
 
 
 async def async_setup_entry(
@@ -48,8 +49,13 @@ class AZRouterIntegrationSensor(AZRouterIntegrationEntity, SensorEntity):
         self._attr_unique_id = (
             f"{coordinator.config_entry.entry_id}_{spec.description.key}"
         )
+        self._interpreter: RawValueInterpreter | None = spec.get_value_interpreter()
 
     @property
     def native_value(self) -> str | None:
-        """Return the sensor value extracted from coordinator data."""
-        return self.raw_value
+        """Return the sensor value, translated by the spec if applicable."""
+        return (
+            self._interpreter.interpret(self.raw_value)
+            if self._interpreter
+            else self.raw_value
+        )

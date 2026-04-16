@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from enum import Enum
+from typing import TYPE_CHECKING, Any, override
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
@@ -28,11 +29,38 @@ from homeassistant.const import (
 from .api_request_composer import ApiRequestComposer, BoolToNumConverter
 from .data_value_accessor import DataValueAccessor
 from .device import AZCharger, AZDeviceBase, AZDeviceFactory, AZRouter
+from .enums import ChargeStatus
 
 if TYPE_CHECKING:
     from homeassistant.helpers.device_registry import DeviceInfo
 
     from .coordinator import AZRouterDataUpdateCoordinator
+
+
+# ── Value interpreter ─────────────────────────────────────────────────────────
+
+
+class RawValueInterpreter:
+    """Converts a raw coordinator value into a sensor native value."""
+
+    def interpret(self, raw: Any) -> Any:
+        """Return the native value for the given raw value."""
+        return raw
+
+
+class EnumValueInterpreter[EnumT: Enum](RawValueInterpreter):
+    """Interprets a raw int as the name of the matching member of EnumT."""
+
+    def __init__(self, enum_class: type[EnumT]) -> None:
+        """Store the enum class used for interpretation."""
+        self._enum_class = enum_class
+
+    def interpret(self, raw: Any) -> str | None:
+        """Return the enum member name for the given int value, or None if unknown."""
+        try:
+            return self._enum_class(raw).name
+        except (ValueError, TypeError):
+            return None
 
 
 # ── Spec dataclasses ──────────────────────────────────────────────────────────
@@ -45,6 +73,19 @@ class SensorSpec:
     description: SensorEntityDescription
     path: str
     device_info: DeviceInfo
+
+    def get_value_interpreter(self) -> RawValueInterpreter | None:
+        return None
+
+
+@dataclass
+class EnumSensorSpec(SensorSpec):
+    """SensorSpec that translates a raw int into the matching enum member name."""
+
+    value_interpreter: RawValueInterpreter
+
+    def get_value_interpreter(self) -> RawValueInterpreter:
+        return self.value_interpreter
 
 
 @dataclass
@@ -346,15 +387,17 @@ class _ChargerDescriptions(_DeviceDescriptionProvider):
                 path=f"devices.{i}.charge.boostSource",
                 device_info=self._di,
             ),
-            SensorSpec(
+            EnumSensorSpec(
                 description=SensorEntityDescription(
                     key=f"charger_{i}_charge_status",
                     name="Charge Status",
                     icon="mdi:ev-plug-type2",
-                    state_class=SensorStateClass.MEASUREMENT,
+                    device_class=SensorDeviceClass.ENUM,
+                    options=[e.name for e in ChargeStatus],
                 ),
                 path=f"devices.{i}.charge.status",
                 device_info=self._di,
+                value_interpreter=EnumValueInterpreter(ChargeStatus),
             ),
             SensorSpec(
                 description=SensorEntityDescription(
