@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from homeassistant.components.binary_sensor import BinarySensorEntity
 
 from .entity import AZRouterIntegrationEntity
-from .entity_description import BinarySensorSpec, create_entity_factory
+from .entity_description import create_entity_factory
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
     from .coordinator import AZRouterDataUpdateCoordinator
     from .data import AZRouterIntegrationConfigEntry
+    from .sensor_specs import BinarySensorSpec
 
 
 async def async_setup_entry(
