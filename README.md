@@ -10,27 +10,46 @@
 
 _Home Assistant integration for the [A-Z Traders Router SMART][hacs-azrouter] — a smart EV charging router that manages connected chargers. Polls the router locally over its REST API._
 
-**This integration sets up the following platforms.**
+## Entities
 
-### Router entities
+### Router
 
 Platform | Entity | Description
 -- | -- | --
 `sensor` | Uptime | Router system uptime (reported in days)
-`sensor` | Temperature | Router CPU/board temperature in °C
+`sensor` | Temperature | Router board temperature in °C
 `sensor` | Active Device Max Power | Maximum power of the currently active device in W
+`sensor` | Cloud Status | Status string returned by the cloud endpoint
+`sensor` | Input Power L1 / L2 / L3 | Per-phase input power in W
+`sensor` | Input Voltage L1 / L2 / L3 | Per-phase input voltage in V
+`sensor` | Input Current L1 / L2 / L3 | Per-phase input current in A
+`sensor` | Output Power L1 / L2 / L3 | Per-phase output power in W
+`sensor` | Output Energy 0 – 3 | Per-output energy counter in kWh
+`sensor` | Regulation Target Power | Configured regulation target power in W
 `binary_sensor` | Cloud | Whether the router can reach the A-Z cloud (`connectivity`)
+`binary_sensor` | Cloud Registered | Whether the router is registered with the cloud
 `binary_sensor` | HDO | State of the HDO (ripple control) signal
 `switch` | Master Boost | Enable/disable global boost mode on the router
 
-### Charger entities (per connected charger)
+### Charger (per connected charger)
 
 Platform | Entity | Description
 -- | -- | --
 `sensor` | Charging Power | Total charging power in W
 `sensor` | WiFi Signal | Charger WiFi signal strength in dBm
-`sensor` | Boost Source | Source of the active boost command
+`sensor` | Boost Source | Active boost source — one of `Manual`, `Hdo`, `Window`, `WindowAndHdo`
+`sensor` | Charge Status | Charger state — one of `Disconnected`, `Waiting`, `Charging`, `Overheated`, `Error`, `Unavailable`
+`sensor` | Temperature | Charger temperature in °C
+`sensor` | Current L1 / L2 / L3 | Per-phase charging current in A
+`binary_sensor` | Connected | Whether the charger is connected to the router
 `switch` | Boost | Enable/disable boost mode on this charger
+
+## Polling intervals
+
+Resource | Interval
+-- | --
+Status, Power, Devices | Every 1 second
+Cloud Status, Settings | Every 60 seconds
 
 ## Installation
 
@@ -65,8 +84,6 @@ The integration is configured entirely through the Home Assistant UI — no `con
 
 > Only one instance of this integration can be configured at a time (`single_config_entry`).
 
-Data is polled from the router once per hour.
-
 ## Contributions are welcome!
 
 If you want to contribute to this please read the [Contribution guidelines](CONTRIBUTING.md)
@@ -76,7 +93,6 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 [hacs-azrouter]: https://github.com/termitt64/hacs-azrouter
 [commits-shield]: https://img.shields.io/github/commit-activity/y/termitt64/hacs-azrouter.svg?style=for-the-badge
 [commits]: https://github.com/termitt64/hacs-azrouter/commits/main
-[exampleimg]: example.png
 [forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=for-the-badge
 [forum]: https://community.home-assistant.io/
 [license-shield]: https://img.shields.io/github/license/termitt64/hacs-azrouter.svg?style=for-the-badge

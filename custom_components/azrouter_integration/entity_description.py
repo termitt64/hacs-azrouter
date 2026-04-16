@@ -28,42 +28,19 @@ from homeassistant.const import (
 from .api_request_composer import ApiRequestComposer, BoolToNumConverter
 from .data_value_accessor import DataValueAccessor
 from .device import AZCharger, AZDeviceBase, AZDeviceFactory, AZRouter
+from .enums import ChargeStatus, DeviceBoostMode
+from .sensor_specs import (
+    BinarySensorSpec,
+    EnumSensorSpec,
+    EnumValueInterpreter,
+    SensorSpec,
+    SwitchSpec,
+)
 
 if TYPE_CHECKING:
     from homeassistant.helpers.device_registry import DeviceInfo
 
     from .coordinator import AZRouterDataUpdateCoordinator
-
-
-# ── Spec dataclasses ──────────────────────────────────────────────────────────
-
-
-@dataclass
-class SensorSpec:
-    """Bundles a SensorEntityDescription with its data path and device."""
-
-    description: SensorEntityDescription
-    path: str
-    device_info: DeviceInfo
-
-
-@dataclass
-class BinarySensorSpec:
-    """Bundles a BinarySensorEntityDescription with its data path and device."""
-
-    description: BinarySensorEntityDescription
-    path: str
-    device_info: DeviceInfo
-
-
-@dataclass
-class SwitchSpec:
-    """Bundles a SwitchEntityDescription with its accessor, request, and device info."""
-
-    description: SwitchEntityDescription
-    reader: DataValueAccessor
-    writer: ApiRequestComposer
-    device_info: DeviceInfo
 
 
 @dataclass
@@ -336,25 +313,29 @@ class _ChargerDescriptions(_DeviceDescriptionProvider):
                 path=f"devices.{i}.common.signal",
                 device_info=self._di,
             ),
-            SensorSpec(
+            EnumSensorSpec(
                 description=SensorEntityDescription(
                     key=f"charger_{i}_boost_source",
                     name="Boost Source",
                     icon="mdi:rocket-launch-outline",
-                    state_class=SensorStateClass.MEASUREMENT,
+                    device_class=SensorDeviceClass.ENUM,
+                    options=[e.name for e in DeviceBoostMode],
                 ),
                 path=f"devices.{i}.charge.boostSource",
                 device_info=self._di,
+                value_interpreter=EnumValueInterpreter(DeviceBoostMode),
             ),
-            SensorSpec(
+            EnumSensorSpec(
                 description=SensorEntityDescription(
                     key=f"charger_{i}_charge_status",
                     name="Charge Status",
                     icon="mdi:ev-plug-type2",
-                    state_class=SensorStateClass.MEASUREMENT,
+                    device_class=SensorDeviceClass.ENUM,
+                    options=[e.name for e in ChargeStatus],
                 ),
                 path=f"devices.{i}.charge.status",
                 device_info=self._di,
+                value_interpreter=EnumValueInterpreter(ChargeStatus),
             ),
             SensorSpec(
                 description=SensorEntityDescription(
