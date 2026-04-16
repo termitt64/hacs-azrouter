@@ -4,17 +4,18 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Any
-
-from homeassistant.components.binary_sensor import BinarySensorEntityDescription
-from homeassistant.components.sensor import SensorEntityDescription
-from homeassistant.components.switch import SwitchEntityDescription
-
-from .api_request_composer import ApiRequestComposer
-from .data_value_accessor import DataValueAccessor
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from typing import Any
+
+    from homeassistant.components.binary_sensor import BinarySensorEntityDescription
+    from homeassistant.components.sensor import SensorEntityDescription
+    from homeassistant.components.switch import SwitchEntityDescription
     from homeassistant.helpers.device_registry import DeviceInfo
+
+    from .api_request_composer import ApiRequestComposer
+    from .data_value_accessor import DataValueAccessor
 
 
 # ── Value interpreters ────────────────────────────────────────────────────────
@@ -55,6 +56,7 @@ class SensorSpec:
     device_info: DeviceInfo
 
     def get_value_interpreter(self) -> RawValueInterpreter | None:
+        """Return the value interpreter for this spec, or None if not applicable."""
         return None
 
 
@@ -65,6 +67,7 @@ class EnumSensorSpec(SensorSpec):
     value_interpreter: RawValueInterpreter
 
     def get_value_interpreter(self) -> RawValueInterpreter:
+        """Return the interpreter that converts raw values for this enum sensor."""
         return self.value_interpreter
 
 
