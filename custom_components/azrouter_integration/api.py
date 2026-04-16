@@ -9,6 +9,8 @@ from urllib.parse import urljoin
 import aiohttp
 import async_timeout
 
+from .const import LOGGER
+
 API_URL: Final = "/api/v1/"
 
 
@@ -169,7 +171,15 @@ class AZRouterIntegrationApiClient:
                         headers=headers,
                         json=data,
                     )
+                LOGGER.debug("%s %s payload=%s", method.upper(), url, data)
                 _verify_response_or_raise(response)
+                LOGGER.debug(
+                    "%s %s -> %s body=%s",
+                    method.upper(),
+                    url,
+                    response.status,
+                    await response.text(),
+                )
                 return response
 
         except TimeoutError as exception:
