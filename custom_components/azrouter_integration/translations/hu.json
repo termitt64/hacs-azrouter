@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "Ha segítségre van szüksége a konfigurációhoz, nézzen [ide](url.home_url).",
+                "data": {
+                    "username": "Felhasználónév",
+                    "password": "Jelszó"
+                }
+            }
+        },
+        "error": {
+            "auth": "A felhasználónév vagy a jelszó helytelen.",
+            "connection": "Nem lehet csatlakozni a szerverhez.",
+            "unknown": "Ismeretlen hiba történt."
+        }
+    }
+}
