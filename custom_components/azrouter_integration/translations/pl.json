@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "Jeśli potrzebujesz pomocy z konfiguracją, zajrzyj [tutaj](url.home_url).",
+                "data": {
+                    "username": "Nazwa użytkownika",
+                    "password": "Hasło"
+                }
+            }
+        },
+        "error": {
+            "auth": "Nazwa użytkownika lub hasło jest nieprawidłowe.",
+            "connection": "Nie można połączyć się z serwerem.",
+            "unknown": "Wystąpił nieznany błąd."
+        }
+    }
+}

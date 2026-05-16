@@ -1,0 +1,18 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "Pokud potřebujete pomoc s konfigurací, podívejte se [sem](url.home_url).",
+                "data": {
+                    "username": "Uživatelské jméno",
+                    "password": "Heslo"
+                }
+            }
+        },
+        "error": {
+            "auth": "Uživatelské jméno nebo heslo je nesprávné.",
+            "connection": "Nelze se připojit k serveru.",
+            "unknown": "Došlo k neznámé chybě."
+        }
+    }
+}
