@@ -6,7 +6,7 @@
 
 ![Project Maintenance][maintenance-shield]
 
-[![Community Forum][forum-shield]][forum]
+[![HA Version][ha-version-shield]][ha-version]
 
 _Home Assistant integration for the [A-Z Traders Router SMART][aztraders-azrouter] — a smart EV charging router that manages connected chargers. Polls the router locally over its REST API._
 
@@ -105,6 +105,8 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 [commits]: https://github.com/termitt64/hacs-azrouter/commits/main
 [forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=for-the-badge
 [forum]: https://community.home-assistant.io/
+[ha-version-shield]: https://img.shields.io/badge/HA-2026.3%2B-blue.svg?style=for-the-badge
+[ha-version]: https://www.home-assistant.io/
 [license-shield]: https://img.shields.io/github/license/termitt64/hacs-azrouter.svg?style=for-the-badge
 [maintenance-shield]: https://img.shields.io/badge/maintainer-Martin%20Petera-blue.svg?style=for-the-badge
 [releases-shield]: https://img.shields.io/github/release/termitt64/hacs-azrouter.svg?style=for-the-badge
