@@ -1,6 +1,6 @@
 aiohttp==3.13.3
 async_timeout==5.0.1
-black==26.5.0
+black==26.5.1
 colorlog==6.10.1
 homeassistant==2026.3.0
 pip>=26.1.1
