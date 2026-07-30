@@ -1,3 +1,4 @@
+# Copyright (c) 2024-2026 Martin Petera
 """Constants for azrouter_integration."""
 
 from logging import Logger, getLogger

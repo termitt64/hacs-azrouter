@@ -1,3 +1,4 @@
+# Copyright (c) 2024-2026 Martin Petera
 """Helper objects for accessing and writing values within nested JSON data."""
 
 from __future__ import annotations

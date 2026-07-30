@@ -1,3 +1,4 @@
+# Copyright (c) 2024-2026 Martin Petera
 """
 Custom integration to integrate azrouter_integration with Home Assistant.
 

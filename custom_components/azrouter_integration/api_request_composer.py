@@ -1,3 +1,4 @@
+# Copyright (c) 2024-2026 Martin Petera
 """Utilities for composing and executing API write requests."""
 
 import copy

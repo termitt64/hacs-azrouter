@@ -1,3 +1,4 @@
+# Copyright (c) 2024-2026 Martin Petera
 """
 Representation of AZ Router and linked devices.
 

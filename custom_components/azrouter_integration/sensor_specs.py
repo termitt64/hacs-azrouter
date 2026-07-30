@@ -1,3 +1,4 @@
+# Copyright (c) 2024-2026 Martin Petera
 """Spec dataclasses and value interpreters for azrouter_integration entities."""
 
 from __future__ import annotations
