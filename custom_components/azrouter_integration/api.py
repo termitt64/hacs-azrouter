@@ -1,3 +1,4 @@
+# Copyright (c) 2024-2026 Martin Petera
 """AZ Router API Client."""
 
 from __future__ import annotations

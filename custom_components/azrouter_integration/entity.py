@@ -1,3 +1,4 @@
+# Copyright (c) 2024-2026 Martin Petera
 """AZRouterEntity class."""
 
 from __future__ import annotations

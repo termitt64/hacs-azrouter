@@ -1,3 +1,4 @@
+# Copyright (c) 2024-2026 Martin Petera
 """Adds config flow for AZRouter."""
 
 from __future__ import annotations

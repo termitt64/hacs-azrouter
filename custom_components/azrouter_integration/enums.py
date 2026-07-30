@@ -1,3 +1,4 @@
+# Copyright (c) 2024-2026 Martin Petera
 """
 Enumerations for azrouter_integration.
 
